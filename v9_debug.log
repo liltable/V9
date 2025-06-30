@@ -1,0 +1,3 @@
+2025-06-30T02:01:24.658000Z [INFO ] FEN 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' loaded.
+2025-06-30T02:01:28.346000Z [WARN ] No castling rights detected in the loading FEN. Defaulting to full...
+2025-06-30T02:01:28.346000Z [INFO ] FEN ' r1b2rk1/pp3ppp/2pb1q2/4p3/4P3/1BPn1N2/PP1N1PPP/R2QR1K1 w - - 2 13' loaded.
