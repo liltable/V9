@@ -1,5 +1,7 @@
 # Visionary IX (V9)
-A UCI compliant chess engine written in the V programming language.
+A UCI compliant chess engine written in the V programming language.\
+Current Version: 0.1.1\
+Latest Feature: Iterative Deepening
 
 ## Features
 
