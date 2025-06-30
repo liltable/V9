@@ -67,6 +67,9 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 				bot.board.print_stdout()
 			}
 		}
+		'ttsize' {
+			println('${bot.tt.size} entries')
+		}
 		else {}
 	}
 }

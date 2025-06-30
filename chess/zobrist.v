@@ -1,6 +1,7 @@
 module chess
 
 pub struct Zobrist {
+pub:
 	piece_keys      [13][64]Bitboard = [13][64]Bitboard{init: [64]Bitboard{init: xs32.roll()}}
 	castling_keys   [16]Bitboard     = [16]Bitboard{init: xs32.roll()}
 	en_passant_keys [8]Bitboard      = [8]Bitboard{init: xs32.roll()}

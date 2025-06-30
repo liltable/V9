@@ -1,6 +1,6 @@
 module engine
 
-import chess { Board, Move }
+import chess { Bitboard, Board, Color, Move }
 import time { StopWatch }
 import math { max }
 
@@ -16,7 +16,6 @@ pub:
 	time_limit int
 pub mut:
 	root_move Move
-	stop      chan bool
 	output    chan string
 	active    bool
 mut:
@@ -27,12 +26,28 @@ mut:
 	overtime bool
 }
 
-pub fn Search.new(pos Board, stop chan bool, oc chan string, time_limit int) Search {
-	return Search{time_limit, null_move, &stop, &oc, false, pos, StopWatch{}, TranspositionTable.new(64), 0, false}
+pub fn Search.new(pos Board, oc chan string, time_limit int) Search {
+	return Search{time_limit, null_move, &oc, false, pos, StopWatch{}, TranspositionTable.new(0), 0, false}
 }
 
 fn (mut search Search) check_overtime() {
 	search.overtime = search.timer.elapsed().milliseconds() > search.time_limit
+}
+
+fn (search Search) get_zobrist_key() Bitboard {
+	mut key := search.position.position_hash
+
+	key ^= chess.zobrist.castling_keys[int(search.position.castling_rights)]
+
+	if search.position.en_passant_file > 0 {
+		key ^= chess.zobrist.en_passant_keys[search.position.en_passant_file.lsb() & 7]
+	}
+
+	if search.position.turn == Color.black {
+		key ^= chess.zobrist.side_key
+	}
+
+	return key
 }
 
 pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
@@ -74,9 +89,7 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 
 	if best_score == -9999999 {
 		if search.position.us_in_check() {
-			return best_score + ply
-		} else {
-			return 0
+			best_score += ply
 		}
 	}
 
@@ -91,6 +104,7 @@ pub fn (mut bot Engine) start_search(mut search Search) {
 	search.overtime = false
 	search.root_move = null_move
 	search.timer.start()
+	search.tt = &bot.tt
 
 	search.iterate(search.output)
 }

@@ -6,12 +6,13 @@ import os
 
 pub struct Engine {
 pub mut:
-	info          EngineInfo
-	board         chess.Board
-	logger        log.Log
+	info           EngineInfo
+	board          chess.Board
+	logger         log.Log
 	current_search Search
-	stdin chan string
-	output chan string
+	stdin          chan string
+	output         chan string
+	tt             TranspositionTable
 }
 
 pub fn Engine.new() Engine {
@@ -23,7 +24,7 @@ pub fn Engine.new() Engine {
 
 	log.set_logger(&logger)
 
-	return Engine{EngineInfo{}, chess.Board{}, &logger, Search{}, chan string{}, chan string{}}
+	return Engine{EngineInfo{}, chess.Board{}, &logger, Search{}, chan string{}, chan string{}, TranspositionTable.new(64)}
 }
 
 pub fn (mut bot Engine) log_input(input string) {
@@ -36,28 +37,28 @@ pub fn (mut bot Engine) log_response(output string) {
 }
 
 pub fn (mut bot Engine) uci_respond(output chan string) {
-  for {
-    response := <- output
-  	bot.log_response(response)
-  	println(response)
-  }
+	for {
+		response := <-output
+		bot.log_response(response)
+		println(response)
+	}
 }
 
 pub fn (mut bot Engine) read_stdin(stdin chan string) {
-  for {
-    input := os.get_line()
-    stdin <- input.trim_space()
-  }
+	for {
+		input := os.get_line()
+		stdin <- input.trim_space()
+	}
 }
 
 pub fn (mut bot Engine) uci_listen() {
 	println('${bot.info.name} ${bot.info.version} by ${bot.info.author}')
 	bot.board.load_fen(chess.starting_fen)
-  spawn bot.read_stdin(bot.stdin)
-  spawn bot.uci_respond(bot.output)
+	spawn bot.read_stdin(bot.stdin)
+	spawn bot.uci_respond(bot.output)
 
 	for {
-		input := <- bot.stdin or { "" }
+		input := <-bot.stdin or { '' }
 
 		mut args := input.split_by_space()
 
@@ -70,7 +71,7 @@ pub fn (mut bot Engine) uci_listen() {
 				bot.handle_uci()
 			}
 			'isready' {
-				bot.output <- "readyok"
+				bot.output <- 'readyok'
 			}
 			'ucinewgame' {
 				bot.board = chess.Board{}
@@ -91,12 +92,12 @@ pub fn (mut bot Engine) uci_listen() {
 				bot.handle_quit()
 			}
 			'exit' {
-			  bot.handle_quit()
+				bot.handle_quit()
 			}
 			'stop' {
-			  if bot.current_search.active {
-					  bot.current_search.output <- "stop"
-					}
+				if bot.current_search.active {
+					bot.current_search.output <- 'stop'
+				}
 			}
 			else {
 				log.warn("Received unknown command: '${command}'")

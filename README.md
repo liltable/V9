@@ -10,9 +10,9 @@ Latest Feature: Iterative Deepening
     - [ ] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
+    - [ ] Quiesence Search
     - [ ] Transposition Tables
     - [ ] Aspiration Windows
-    - [ ] Quiesence Search
     - [ ] Move Ordering
 
 ## Notes

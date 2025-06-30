@@ -65,31 +65,32 @@ fn (mut bot Engine) handle_go(mut args []string) {
 
 		bot.output <- 'info string time limit set to ${time_limit}ms'
 
-		cc := chan bool{}
-		output := chan string {}
+		output := chan string{}
 
-		bot.current_search = Search.new(bot.board, cc, output, time_limit)
+		bot.current_search = Search.new(bot.board, output, time_limit)
 
 		go bot.start_search(mut &bot.current_search)
 
 		for {
-		  result := <- bot.current_search.output or { ":(" }
+			result := <-bot.current_search.output or { ':(' }
 			bot.output <- result
 
-			if result.str().split_by_space()[0] == 'bestmove' { break }
+			if result.str().split_by_space()[0] == 'bestmove' {
+				break
+			}
 		}
 	}
 }
 
 pub fn (mut bot Engine) handle_quit() {
-  if bot.current_search.active {
-    bot.current_search.output <- "stop"
-  } else {
-    exit(0)
-  }
+	if bot.current_search.active {
+		bot.current_search.output <- 'stop'
+	} else {
+		exit(0)
+	}
 }
 
 pub fn (mut bot Engine) random_move() chess.Move {
-  moves := bot.board.get_moves()
-  return element(moves) or { moves[0] }
+	moves := bot.board.get_moves()
+	return element(moves) or { moves[0] }
 }
