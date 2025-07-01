@@ -1,4 +1,7 @@
 builds/
 tests/
+etc/
 *.log
 v.mod
+*.exe
+*.json

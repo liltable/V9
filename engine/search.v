@@ -50,23 +50,55 @@ fn (search Search) get_zobrist_key() Bitboard {
 	return key
 }
 
+pub fn (mut search Search) quiesence(a int, b int) int {
+	stand_pat := search.position.score()
+	search.nodes++
+
+	if (search.nodes & 2047) > 0 {
+		search.check_overtime()
+	}
+
+	mut alpha, mut beta := a, b
+
+	mut best_score := stand_pat
+
+	if best_score >= beta {
+		return best_score
+	}
+
+	alpha = max(alpha, best_score)
+
+	for move in search.position.get_moves(true) {
+		search.position.make_move(move)
+		score := -search.quiesence(-beta, -alpha)
+		search.position.undo_move()
+
+		if score >= beta {
+			return score
+		}
+
+		best_score = max(score, best_score)
+		alpha = max(alpha, best_score)
+	}
+
+	return best_score
+}
+
 pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 	search.nodes++
 
 	mut best_score := -9999999
 	mut alpha, mut beta := a, b
 
-	stand_pat := search.position.score()
-
 	if (search.nodes & 2047) > 0 {
 		search.check_overtime()
 	}
 
-	if depth <= 0 {
-		return stand_pat
+	if depth <= 2 {
+		return search.quiesence(alpha, beta)
 	}
 
-	moves := search.position.get_moves()
+	moves := search.position.get_moves(false)
 
 	for move in moves {
 		search.position.make_move(move)
@@ -89,7 +121,7 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 
 	if best_score == -9999999 {
 		if search.position.us_in_check() {
-			best_score += ply
+			return -9999999 + ply
 		}
 	}
 
@@ -102,9 +134,10 @@ pub fn (mut bot Engine) start_search(mut search Search) {
 	search.timer = StopWatch{}
 	search.nodes = 0
 	search.overtime = false
-	search.root_move = null_move
-	search.timer.start()
+	search.root_move = bot.random_move()
 	search.tt = &bot.tt
+
+	search.timer.start()
 
 	search.iterate(search.output)
 }
@@ -131,7 +164,9 @@ pub fn (mut search Search) iterate(output chan string) {
 		}
 
 		completed_searches << search.root_move
-		output <- 'info depth ${depth} score cp ${score} nodes ${search.nodes} time ${search.timer.elapsed().milliseconds()} pv ${search.root_move.lan()}'
+		if search.root_move != null_move {
+			output <- 'info depth ${depth} score cp ${score} nodes ${search.nodes} time ${search.timer.elapsed().milliseconds()} pv ${search.root_move.lan()}'
+		}
 	}
 
 	output <- 'bestmove ${completed_searches.last().lan()}'

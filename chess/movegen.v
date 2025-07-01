@@ -1,6 +1,6 @@
 module chess
 
-pub fn (mut b Board) get_moves() []Move {
+pub fn (mut b Board) get_moves(only_captures bool) []Move {
 	b.update_attacks()
 
 	mut moves := []Move{}
@@ -10,11 +10,11 @@ pub fn (mut b Board) get_moves() []Move {
 		return moves
 	}
 
-	b.pawn_moves(mut &moves)
-	b.knight_moves(mut &moves)
-	b.bishop_moves(mut &moves)
-	b.rook_moves(mut &moves)
-	b.queen_moves(mut &moves)
+	b.pawn_moves(mut &moves, only_captures)
+	b.knight_moves(mut &moves, only_captures)
+	b.bishop_moves(mut &moves, only_captures)
+	b.rook_moves(mut &moves, only_captures)
+	b.queen_moves(mut &moves, only_captures)
 	b.king_moves(mut &moves)
 
 	return moves
@@ -23,7 +23,7 @@ pub fn (mut b Board) get_moves() []Move {
 pub fn (mut b Board) get_move_list() map[string]Move {
 	mut list := map[string]Move{}
 
-	moves := b.get_moves()
+	moves := b.get_moves(false)
 
 	for mv in moves {
 		list[mv.lan()] = mv
@@ -32,7 +32,7 @@ pub fn (mut b Board) get_move_list() map[string]Move {
 	return list
 }
 
-pub fn (b Board) pawn_moves(mut moves []Move) {
+pub fn (b Board) pawn_moves(mut moves []Move, only_captures bool) {
 	us := b.turn
 	opp := us.opp()
 	occupied := b.occupancies[Occupancies.both]
@@ -48,49 +48,76 @@ pub fn (b Board) pawn_moves(mut moves []Move) {
 
 	mut single_push_np := our_pawns & ~promotion_rank
 	mut double_push := our_pawns
-	mut captures_np := our_pawns & ~promotion_rank
 	mut single_push_p := our_pawns & promotion_rank
+
+	mut captures_np := our_pawns & ~promotion_rank
 	mut captures_p := our_pawns & promotion_rank
 
-	for single_push_np > 0 {
-		pawn := single_push_np.pop_lsb()
-		piece := b.pieces[pawn]
-		p := square_bbs[pawn]
-		is_pinned := (square_bbs[pawn] & pinned) > 0
+	if !only_captures {
+		for single_push_np > 0 {
+			pawn := single_push_np.pop_lsb()
+			piece := b.pieces[pawn]
+			p := square_bbs[pawn]
+			is_pinned := (square_bbs[pawn] & pinned) > 0
 
-		mut destination := p.forward(us) & empty
+			mut destination := p.forward(us) & empty
 
-		if in_check {
-			destination &= b.checkray
+			if in_check {
+				destination &= b.checkray
+			}
+
+			if is_pinned {
+				destination &= b.pinray[pawn]
+			}
+
+			for destination > 0 {
+				moves << Move.encode(piece, pawn, destination.pop_lsb(), .none, .none,
+					.none)
+			}
 		}
 
-		if is_pinned {
-			destination &= b.pinray[pawn]
+		for double_push > 0 {
+			pawn := double_push.pop_lsb()
+			piece := b.pieces[pawn]
+			p := square_bbs[pawn]
+			is_pinned := (pinned & square_bbs[pawn]) > 0
+
+			mut destination := (p.forward(us) & double_push_rank & empty).forward(us) & empty
+
+			if in_check {
+				destination &= b.checkray
+			}
+
+			if is_pinned {
+				destination &= b.pinray[pawn]
+			}
+
+			if destination > 0 {
+				moves << Move.encode(piece, pawn, destination.lsb(), .none, .none, .pawn_double)
+			}
 		}
 
-		for destination > 0 {
-			moves << Move.encode(piece, pawn, destination.pop_lsb(), .none, .none, .none)
-		}
-	}
+		for single_push_p > 0 {
+			pawn := single_push_p.pop_lsb()
+			piece := b.pieces[pawn]
+			is_pinned := (b.pinned[us] & square_bbs[pawn]) > 0
 
-	for double_push > 0 {
-		pawn := double_push.pop_lsb()
-		piece := b.pieces[pawn]
-		p := square_bbs[pawn]
-		is_pinned := (pinned & square_bbs[pawn]) > 0
+			mut destination := square_bbs[pawn].forward(us) & empty & b.pinray[pawn]
 
-		mut destination := (p.forward(us) & double_push_rank & empty).forward(us) & empty
+			if in_check {
+				destination &= b.checkray
+			}
 
-		if in_check {
-			destination &= b.checkray
-		}
+			if is_pinned {
+				destination &= b.pinray[pawn]
+			}
 
-		if is_pinned {
-			destination &= b.pinray[pawn]
-		}
-
-		if destination > 0 {
-			moves << Move.encode(piece, pawn, destination.lsb(), .none, .none, .pawn_double)
+			if destination > 0 {
+				moves << Move.encode(piece, pawn, destination.lsb(), .knight, .none, .none)
+				moves << Move.encode(piece, pawn, destination.lsb(), .bishop, .none, .none)
+				moves << Move.encode(piece, pawn, destination.lsb(), .rook, .none, .none)
+				moves << Move.encode(piece, pawn, destination.lsb(), .queen, .none, .none)
+			}
 		}
 	}
 
@@ -128,29 +155,6 @@ pub fn (b Board) pawn_moves(mut moves []Move) {
 		}
 	}
 
-	for single_push_p > 0 {
-		pawn := single_push_p.pop_lsb()
-		piece := b.pieces[pawn]
-		is_pinned := (b.pinned[us] & square_bbs[pawn]) > 0
-
-		mut destination := square_bbs[pawn].forward(us) & empty & b.pinray[pawn]
-
-		if in_check {
-			destination &= b.checkray
-		}
-
-		if is_pinned {
-			destination &= b.pinray[pawn]
-		}
-
-		if destination > 0 {
-			moves << Move.encode(piece, pawn, destination.lsb(), .knight, .none, .none)
-			moves << Move.encode(piece, pawn, destination.lsb(), .bishop, .none, .none)
-			moves << Move.encode(piece, pawn, destination.lsb(), .rook, .none, .none)
-			moves << Move.encode(piece, pawn, destination.lsb(), .queen, .none, .none)
-		}
-	}
-
 	for captures_p > 0 {
 		pawn := captures_p.pop_lsb()
 		piece := b.pieces[pawn]
@@ -177,7 +181,7 @@ pub fn (b Board) pawn_moves(mut moves []Move) {
 	}
 }
 
-pub fn (b Board) knight_moves(mut moves []Move) {
+pub fn (b Board) knight_moves(mut moves []Move, only_captures bool) {
 	us := b.turn
 	enemy := b.occupancies[us.opp()]
 	empty := ~b.occupancies[Occupancies.both]
@@ -200,8 +204,10 @@ pub fn (b Board) knight_moves(mut moves []Move) {
 			quiets &= b.checkray
 		}
 
-		for quiets > 0 {
-			moves << Move.encode(piece, knight, quiets.pop_lsb(), .none, .none, .none)
+		if !only_captures {
+			for quiets > 0 {
+				moves << Move.encode(piece, knight, quiets.pop_lsb(), .none, .none, .none)
+			}
 		}
 
 		for captures > 0 {
@@ -210,7 +216,7 @@ pub fn (b Board) knight_moves(mut moves []Move) {
 	}
 }
 
-pub fn (b Board) bishop_moves(mut moves []Move) {
+pub fn (b Board) bishop_moves(mut moves []Move, only_captures bool) {
 	us := b.turn
 	enemy := b.occupancies[us.opp()]
 	occupied := b.occupancies[Occupancies.both]
@@ -240,8 +246,10 @@ pub fn (b Board) bishop_moves(mut moves []Move) {
 			quiets &= pinray
 		}
 
-		for quiets > 0 {
-			moves << Move.encode(piece, bishop, quiets.pop_lsb(), .none, .none, .none)
+		if !only_captures {
+			for quiets > 0 {
+				moves << Move.encode(piece, bishop, quiets.pop_lsb(), .none, .none, .none)
+			}
 		}
 
 		for captures > 0 {
@@ -250,7 +258,7 @@ pub fn (b Board) bishop_moves(mut moves []Move) {
 	}
 }
 
-pub fn (b Board) rook_moves(mut moves []Move) {
+pub fn (b Board) rook_moves(mut moves []Move, only_captures bool) {
 	us := b.turn
 	enemy := b.occupancies[us.opp()]
 	occupied := b.occupancies[Occupancies.both]
@@ -280,8 +288,10 @@ pub fn (b Board) rook_moves(mut moves []Move) {
 			quiets &= pinray
 		}
 
-		for quiets > 0 {
-			moves << Move.encode(piece, rook, quiets.pop_lsb(), .none, .none, .none)
+		if !only_captures {
+			for quiets > 0 {
+				moves << Move.encode(piece, rook, quiets.pop_lsb(), .none, .none, .none)
+			}
 		}
 
 		for captures > 0 {
@@ -290,7 +300,7 @@ pub fn (b Board) rook_moves(mut moves []Move) {
 	}
 }
 
-pub fn (b Board) queen_moves(mut moves []Move) {
+pub fn (b Board) queen_moves(mut moves []Move, only_captures bool) {
 	us := b.turn
 	enemy := b.occupancies[us.opp()]
 	occupied := b.occupancies[Occupancies.both]
@@ -320,8 +330,10 @@ pub fn (b Board) queen_moves(mut moves []Move) {
 			quiets &= pinray
 		}
 
-		for quiets > 0 {
-			moves << Move.encode(piece, queen, quiets.pop_lsb(), .none, .none, .none)
+		if !only_captures {
+			for quiets > 0 {
+				moves << Move.encode(piece, queen, quiets.pop_lsb(), .none, .none, .none)
+			}
 		}
 
 		for captures > 0 {
