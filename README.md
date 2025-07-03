@@ -1,7 +1,12 @@
 # Visionary IX (V9)
+
 A UCI compliant chess engine written in the V programming language.\
 Current Version: 0.2.1\
 Changelog: Removed quiesence search to avoid search explosions, pending the addition of transposition tables and move ordering.
+
+Current Version: 0.2.2
+Latest Feature: Move Ordering
+>>>>>>> transposition-tables
 
 ## Features
 - [x] Legal Move Generation
@@ -9,13 +14,17 @@ Changelog: Removed quiesence search to avoid search explosions, pending the addi
     - [ ] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
-    - [ ] Transposition Tables
     - [ ] Move Ordering
+<<<<<<< HEAD
       - [ ] MVV-LVA
       - [ ] Static Exchange Evaluation (SEE)
       - [ ] Killer Moves
       - [ ] History Heuristic
     - [ ] Quiesence Search (+150 elo)
+=======
+    - [ ] Transposition Tables
+    - [ ] Quiesence Search (+150 before revert)
+>>>>>>> transposition-tables
     - [ ] Aspiration Windows
 
 
