@@ -50,10 +50,10 @@ const eg_king = [-74, -35, -18, -18, -11, 15, 4, -17, -12, 17, 14, 17, 17, 38, 2
 pub const mg_eval_table = [mg_pawn, mg_knight, mg_bishop, mg_rook, mg_queen, mg_king]
 pub const eg_eval_table = [eg_pawn, eg_knight, eg_bishop, eg_rook, eg_queen, eg_king]
 
-pub const mg_value = [82, 337, 365, 477, 1025, 0]
-pub const eg_value = [94, 281, 297, 512, 936, 0]
+pub const mg_value = [0, 82, 337, 365, 477, 1025, 0]
+pub const eg_value = [0, 94, 281, 297, 512, 936, 0]
 
-pub const gamephase_inc = [0, 1, 1, 2, 4, 0]
+pub const gamephase_inc = [0, 0, 1, 1, 2, 4, 0]
 
 pub fn read_psqt(piece Piece, square int) (int, int) {
   index := if piece.color() == .white { square ^ 56 } else { square }

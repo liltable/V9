@@ -36,11 +36,18 @@ fn (mut bot Engine) handle_pos(mut args []string) {
 	if args.len > 0 && args[0] == 'moves' {
 		args.delete(0)
 
-		for move in args {
-			moves := bot.board.get_move_list()
+		moves := bot.board.get_move_list()
+		last_move := args.last()
 
-			if move in moves {
-				bot.board.make_move(moves[move])
+		if last_move in moves {
+			bot.board.make_move(moves[last_move])
+		} else {
+			for move in args {
+				new_moves := bot.board.get_move_list()
+
+				if move in new_moves {
+					bot.board.make_move(moves[move])
+				}
 			}
 		}
 	}
@@ -67,24 +74,17 @@ fn (mut bot Engine) handle_go(mut args []string) {
 
 		output := chan string{}
 
-		bot.current_search = Search.new(bot.board, output, time_limit)
+		bot.search = Search{}
+		bot.search.set_time_limit(time_limit)
+		bot.search.set_comms_channel(output)
 
-		go bot.start_search(mut &bot.current_search)
-
-		for {
-			result := <-bot.current_search.output or { ':(' }
-			bot.output <- result
-
-			if result.str().split_by_space()[0] == 'bestmove' {
-				break
-			}
-		}
+		bot.start_search()
 	}
 }
 
 pub fn (mut bot Engine) handle_quit() {
-	if bot.current_search.active {
-		bot.current_search.output <- 'stop'
+	if bot.search.active {
+		bot.search.comms <- 'stop'
 	} else {
 		exit(0)
 	}

@@ -5,7 +5,7 @@ import math { max, min }
 pub struct TimeControl {
 pub mut:
 	time_remaining [3]int = [3]int{init: 5000}
-	increments     [3]int = [3]int{init: 5}
+	increments     [3]int = [3]int{init: 0}
 }
 
 fn TimeControl.parse(mut args []string) TimeControl {

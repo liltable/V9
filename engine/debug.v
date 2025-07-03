@@ -68,7 +68,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 			}
 		}
 		'ttsize' {
-			println('${bot.tt.size} entries')
+			println('${bot.search.tt.size} entries')
 		}
 		else {}
 	}

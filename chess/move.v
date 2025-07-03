@@ -68,6 +68,11 @@ pub fn (m Move) special() SpecialType {
 	}
 }
 
+pub fn (m Move) is_capture() bool {
+	special := m.special()
+	return special != .none && special != .pawn_double
+}
+
 pub fn (m Move) lan() string {
 	return '${square_names[m.from_square()]}${square_names[m.to_square()]}${piecetype_symbols[(m & move_promo_mask) >> 20]}'
 }

@@ -23,10 +23,10 @@ pub fn (board Board) score() int {
 
       psqt_mg, psqt_eg := read_psqt(piece, square)
 
-      mg[color] += mg_value[type - 1] + psqt_mg
-      eg[color] += eg_value[type - 1] + psqt_eg
+      mg[color] += mg_value[type] + psqt_mg
+      eg[color] += eg_value[type] + psqt_eg
 
-      gamephase += gamephase_inc[type - 1]
+      gamephase += gamephase_inc[type]
     }
   }
 

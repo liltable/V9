@@ -9,10 +9,9 @@ pub mut:
 	info           EngineInfo
 	board          chess.Board
 	logger         log.Log
-	current_search Search
+	search 		   Search
 	stdin          chan string
 	output         chan string
-	tt             TranspositionTable
 }
 
 pub fn Engine.new() Engine {
@@ -24,7 +23,7 @@ pub fn Engine.new() Engine {
 
 	log.set_logger(&logger)
 
-	return Engine{EngineInfo{}, chess.Board{}, &logger, Search{}, chan string{}, chan string{}, TranspositionTable.new(64)}
+	return Engine{EngineInfo{}, chess.Board{}, &logger, Search{} chan string{}, chan string{}}
 }
 
 pub fn (mut bot Engine) log_input(input string) {
@@ -75,6 +74,7 @@ pub fn (mut bot Engine) uci_listen() {
 			}
 			'ucinewgame' {
 				bot.board = chess.Board{}
+				
 			}
 			'position' {
 				bot.handle_pos(mut args)
@@ -95,8 +95,8 @@ pub fn (mut bot Engine) uci_listen() {
 				bot.handle_quit()
 			}
 			'stop' {
-				if bot.current_search.active {
-					bot.current_search.output <- 'stop'
+				if bot.search.active {
+					bot.search.comms <- 'stop'
 				}
 			}
 			else {
