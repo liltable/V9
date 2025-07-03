@@ -1,7 +1,7 @@
 # Visionary IX (V9)
 A UCI compliant chess engine written in the V programming language.\
-Current Version: 0.2.0\
-Latest Feature: Quiesence Search (+150 elo)
+Current Version: 0.2.1\
+Changelog: Removed quiesence search to avoid search explosions, pending the addition of transposition tables and move ordering.
 
 ## Features
 - [x] Legal Move Generation
