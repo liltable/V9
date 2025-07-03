@@ -92,14 +92,14 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 	mut entry_flag := EntryType.exact
 	mut best_move := null_move
 
-	if found_entry.type != .invalid {
-		if found_entry.key == zobrist_key && found_entry.depth >= depth
-			&& (found_entry.type == .exact || (found_entry.type == .lowerbound
-			&& found_entry.score >= beta)
-			|| (found_entry.type == .upperbound && found_entry.score < alpha)) {
-			return found_entry.score
-		}
-	}
+	// if found_entry.type != .invalid {
+	// 	if found_entry.key == zobrist_key && found_entry.depth >= depth
+	// 		&& (found_entry.type == .exact || (found_entry.type == .lowerbound
+	// 		&& found_entry.score >= beta)
+	// 		|| (found_entry.type == .upperbound && found_entry.score < alpha)) {
+	// 		return found_entry.score
+	// 	}
+	// }
 
 	old_alpha := alpha
 
@@ -151,6 +151,11 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 	return best_score
 }
 
+pub fn (search Search) score_move(move Move) int {
+	mut score := 0
+
+	return score
+}
 pub fn (mut bot Engine) start_search(mut search Search) {
 	search.output <- 'info string starting search'
 

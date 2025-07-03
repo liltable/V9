@@ -6,7 +6,6 @@ Changelog: Removed quiesence search to avoid search explosions, pending the addi
 
 Current Version: 0.2.2
 Latest Feature: Move Ordering
->>>>>>> transposition-tables
 
 ## Features
 - [x] Legal Move Generation
@@ -15,16 +14,8 @@ Latest Feature: Move Ordering
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
     - [ ] Move Ordering
-<<<<<<< HEAD
-      - [ ] MVV-LVA
-      - [ ] Static Exchange Evaluation (SEE)
-      - [ ] Killer Moves
-      - [ ] History Heuristic
-    - [ ] Quiesence Search (+150 elo)
-=======
     - [ ] Transposition Tables
     - [ ] Quiesence Search (+150 before revert)
->>>>>>> transposition-tables
     - [ ] Aspiration Windows
 
 
