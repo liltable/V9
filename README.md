@@ -15,7 +15,7 @@ Changelog: Removed quiesence search to avoid search explosions, pending the addi
       - [ ] Static Exchange Evaluation (SEE)
       - [ ] Killer Moves
       - [ ] History Heuristic
-    - [ ] Quiesence Search
+    - [ ] Quiesence Search (+150 elo)
     - [ ] Aspiration Windows
 
 
