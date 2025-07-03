@@ -3,6 +3,9 @@ module chess
 import math { min }
 
 pub fn (board Board) score() int {
+
+  if board.repetitions.is_draw(board.position_hash) || board.draw_counter >= 100 { return 0 }
+
   us := board.turn
   opp := us.opp()
 

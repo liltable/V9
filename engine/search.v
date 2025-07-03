@@ -5,11 +5,7 @@ import time { StopWatch }
 import math { max }
 
 const null_move = Move(0)
-
-pub enum SearchCommand {
-	go
-	stop
-}
+const empty_tt = TranspositionTable.new(0)
 
 struct Search {
 pub:
@@ -21,13 +17,13 @@ pub mut:
 mut:
 	position Board
 	timer    StopWatch
-	tt       TranspositionTable
+	tt       &TranspositionTable
 	nodes    int
 	overtime bool
 }
 
 pub fn Search.new(pos Board, oc chan string, time_limit int) Search {
-	return Search{time_limit, null_move, &oc, false, pos, StopWatch{}, TranspositionTable.new(0), 0, false}
+	return Search{time_limit, null_move, &oc, false, pos, StopWatch{}, &empty_tt 0, false}
 }
 
 fn (mut search Search) check_overtime() {
@@ -37,7 +33,7 @@ fn (mut search Search) check_overtime() {
 fn (search Search) get_zobrist_key() Bitboard {
 	mut key := search.position.position_hash
 
-	key ^= chess.zobrist.castling_keys[int(search.position.castling_rights)]
+	key ^= chess.zobrist.castling_keys[search.position.castling_rights]
 
 	if search.position.en_passant_file > 0 {
 		key ^= chess.zobrist.en_passant_keys[search.position.en_passant_file.lsb() & 7]
