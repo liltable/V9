@@ -146,8 +146,7 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 		entry_flag = .upperbound
 	}
 
-	entry := TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag}
-	search.tt.insert(entry)
+	search.tt.insert(TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag})
 
 	return best_score
 }
