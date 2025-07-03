@@ -1,6 +1,6 @@
   module engine
 
-import chess { Bitboard }
+import chess { Bitboard, Move }
 
 pub enum EntryType {
 	invalid
@@ -14,6 +14,7 @@ pub:
 	key   Bitboard
 	score int
 	depth int
+	move  Move
 	type  EntryType
 }
 

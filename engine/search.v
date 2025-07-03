@@ -23,7 +23,7 @@ mut:
 }
 
 pub fn Search.new(pos Board, oc chan string, time_limit int) Search {
-	return Search{time_limit, null_move, &oc, false, pos, StopWatch{}, &empty_tt 0, false}
+	return Search{time_limit, null_move, &oc, false, pos, StopWatch{}, &empty_tt, 0, false}
 }
 
 fn (mut search Search) check_overtime() {
@@ -77,22 +77,39 @@ pub fn (mut search Search) quiesence(a int, b int) int {
 		alpha = max(alpha, best_score)
 	}
 
-
 	return best_score
 }
 
 pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 	search.nodes++
 
+	zobrist_key := search.get_zobrist_key()
+
+	found_entry := search.tt.lookup(zobrist_key)
+
 	mut best_score := -9999999
 	mut alpha, mut beta := a, b
+	mut entry_flag := EntryType.exact
+	mut best_move := null_move
+
+	if found_entry.type != .invalid {
+		if found_entry.key == zobrist_key && found_entry.depth >= depth
+			&& (found_entry.type == .exact || (found_entry.type == .lowerbound
+			&& found_entry.score >= beta)
+			|| (found_entry.type == .upperbound && found_entry.score < alpha)) {
+			return found_entry.score
+		}
+	}
+
+	old_alpha := alpha
 
 	if (search.nodes & 2047) > 0 {
 		search.check_overtime()
 	}
 
 	if depth <= 0 {
-		// return search.quiesence(alpha, beta) // Not good, vulnerable to search explosions!
+		// return search.quiesence(alpha, beta)
+		// Not good, vulnerable to search explosions!
 		return search.position.score()
 	}
 
@@ -105,6 +122,7 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 
 		if score > best_score {
 			best_score = score
+			best_move = move
 			alpha = max(alpha, best_score)
 
 			if ply == 0 && !search.overtime {
@@ -113,6 +131,7 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 		}
 
 		if alpha >= beta || search.overtime {
+			entry_flag = .lowerbound
 			break
 		}
 	}
@@ -122,6 +141,13 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 			return -9999999 + ply
 		}
 	}
+
+	if entry_flag != .lowerbound && old_alpha > alpha {
+		entry_flag = .upperbound
+	}
+
+	entry := TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag}
+	search.tt.insert(entry)
 
 	return best_score
 }
