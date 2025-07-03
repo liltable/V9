@@ -130,8 +130,12 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 			}
 		}
 
-		if alpha >= beta || search.overtime {
+		if alpha >= beta {
 			entry_flag = .lowerbound
+			break
+		}
+
+		if search.overtime {
 			break
 		}
 	}
@@ -157,8 +161,6 @@ pub fn (search Search) score_move(move Move) int {
 	return score
 }
 pub fn (mut bot Engine) start_search(mut search Search) {
-	search.output <- 'info string starting search'
-
 	search.timer = StopWatch{}
 	search.nodes = 0
 	search.overtime = false
@@ -171,12 +173,10 @@ pub fn (mut bot Engine) start_search(mut search Search) {
 }
 
 pub fn (mut search Search) iterate(output chan string) {
-	mut depth := 2
 	alpha, beta := -9999999, 9999999
-
-	output <- 'info string search started'
+	
+	mut depth := 2
 	mut input := ''
-
 	mut completed_searches := []Move{}
 
 	for {
