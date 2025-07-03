@@ -35,33 +35,45 @@ pub fn (mut bot Engine) start_search() {
 	bot.search.active = true
 	bot.search.timer.start()
 
-	bot.iterate()
+
+	spawn bot.iterate(bot.search.comms)
 
 	for {
-		output := <- bot.search.comms or { ":(" }
+		output := <-bot.search.comms
 
-		
+		bot.output <- output.str()
 
+		if output.str().split_by_space()[0] == 'bestmove' {
+			break
+		}
 	}
 }
 
-pub fn (mut bot Engine) iterate() {
+pub fn (mut bot Engine) iterate(output chan string) {
 	mut depth := 2
 	mut input := ''
 	alpha, beta := -9999999, 9999999
+
+	output <- "info string hi"
 	
 	for {
 		bot.search.check_time()
 		input = ''
-		bot.search.comms.try_pop(mut input)
 
-		if input == "stop" || bot.search.overtime { break } 
+		output.try_pop(mut input)
+
+		if input == "stop" || bot.search.overtime { 
+			output <- 'stopping search'
+			break
+		} 
 
 		depth++
-		score := bot.negamax(depth, 0, alpha, beta)
+		// score := bot.negamax(depth, 0, alpha, beta)
 
-		bot.search.comms <- "info depth ${depth} score cp ${score}"
+		output <- "info depth ${depth}"
 	}
+
+	output <- "bestmove ${bot.random_move().lan()}"
 }
 
 pub fn (mut bot Engine) negamax(depth int, ply int, alpha int, beta int) int {
