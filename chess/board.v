@@ -52,7 +52,6 @@ pub fn (mut b Board) add_piece(piece Piece, at int) {
 		b.occupancies[piece.color()] |= bit
 		b.occupancies[Occupancies.both] |= bit
 
-		b.position_hash ^= zobrist.read_piece(null_piece, at)
 		b.position_hash ^= zobrist.read_piece(piece, at)
 
 		log.debug('Inserted a ${piece.color()} ${piece.type()} ${square_names[at]}.')
@@ -73,7 +72,6 @@ pub fn (mut b Board) remove_piece(at int) Piece {
 	b.occupancies[Occupancies.both] &= ~bit
 
 	b.position_hash ^= zobrist.read_piece(piece, at)
-	b.position_hash ^= zobrist.read_piece(null_piece, at)
 
 	if piece == null_piece {
 		log.warn('Attempted to remove a null piece on ${square_names[at]}.')
@@ -105,8 +103,6 @@ pub fn (mut b Board) move_piece(from int, to int) {
 		b.occupancies[Occupancies.both] |= t
 
 		b.position_hash ^= zobrist.read_piece(piece, from)
-		b.position_hash ^= zobrist.read_piece(null_piece, from)
-		b.position_hash ^= zobrist.read_piece(null_piece, to)
 		b.position_hash ^= zobrist.read_piece(piece, to)
 
 		log.debug('Moved a ${piece.color()} ${piece.type()} from ${square_names[from]} to ${square_names[to]}')

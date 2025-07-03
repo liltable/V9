@@ -17,7 +17,7 @@ pub mut:
 mut:
 	position Board
 	timer    StopWatch
-	tt       &TranspositionTable
+	tt       TranspositionTable
 	nodes    int
 	overtime bool
 }
@@ -77,6 +77,7 @@ pub fn (mut search Search) quiesence(a int, b int) int {
 		alpha = max(alpha, best_score)
 	}
 
+
 	return best_score
 }
 
@@ -90,8 +91,9 @@ pub fn (mut search Search) negamax(depth int, ply int, a int, b int) int {
 		search.check_overtime()
 	}
 
-	if depth <= 2 {
-		return search.quiesence(alpha, beta)
+	if depth <= 0 {
+		// return search.quiesence(alpha, beta) // Not good, vulnerable to search explosions!
+		return search.position.score()
 	}
 
 	moves := search.position.get_moves(false)

@@ -11,8 +11,7 @@ pub:
 pub const zobrist = Zobrist{}
 
 pub fn (z Zobrist) read_piece(piece Piece, square int) Bitboard {
-	index := if piece == null_piece { 0 } else { int(piece.type()) +
-			if piece.color() == .white { 0 } else { 6 }
-	 }
+	index := int(piece.type()) + if piece.color() == .white { 0 } else { 6 }
+
 	return z.piece_keys[index][square]
 }

@@ -9,10 +9,15 @@ Latest Feature: Quiesence Search (+150 elo)
     - [ ] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
-    - [x] Quiesence Search
     - [ ] Transposition Tables
-    - [ ] Aspiration Windows
     - [ ] Move Ordering
+      - [ ] MVV-LVA
+      - [ ] Static Exchange Evaluation (SEE)
+      - [ ] Killer Moves
+      - [ ] History Heuristic
+    - [ ] Quiesence Search
+    - [ ] Aspiration Windows
+
 
 ## Notes
 this takes so long to get right\
