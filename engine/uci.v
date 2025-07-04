@@ -67,7 +67,6 @@ fn (mut bot Engine) handle_go(mut args []string) {
 
 		output := chan string{}
 
-		bot.search = Search{}
 		bot.search.set_time_limit(time_limit)
 		bot.search.set_comms_channel(output)
 

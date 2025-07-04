@@ -1,7 +1,7 @@
 module engine
 
 import time { StopWatch }
-import chess { Move }
+import chess { Move, Bitboard, Color }
 
 const null_move = Move(0)
 
@@ -37,6 +37,7 @@ pub fn (mut search Search) check_time() {
 
 pub fn (mut bot Engine) start_search() {
 	bot.search.active = true
+	bot.search.nodes = 0
 	bot.search.timer.start()
 
 	spawn bot.iterate()
@@ -50,6 +51,22 @@ pub fn (mut bot Engine) start_search() {
 			break
 		}
 	}
+}
+
+pub fn (bot Engine) get_zobrist_key() Bitboard {
+	mut key := bot.board.position_hash
+
+	key ^= chess.zobrist.castling_keys[bot.board.castling_rights]
+
+	if bot.board.en_passant_file > 0 {
+		key ^= chess.zobrist.en_passant_keys[bot.board.en_passant_file.lsb() & 7]
+	}
+
+	if bot.board.turn == Color.black {
+		key ^= chess.zobrist.side_key
+	}
+
+	return key
 }
 
 pub fn (mut bot Engine) iterate() {
@@ -70,7 +87,7 @@ pub fn (mut bot Engine) iterate() {
 
 		bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${bot.search.pv.mainline()}"
 
-		completed_searches << bot.search.root_move
+		completed_searches << bot.search.pv.best_move()
 		depth++
 	}
 
@@ -78,8 +95,19 @@ pub fn (mut bot Engine) iterate() {
 	bot.search.active = false
 }
 
+pub fn (bot Engine) guess_move_score(move Move, entry TranspositionEntry) int {
+	mut guess := 0
+
+	if move == bot.search.pv.best_move() { guess += 900_000 }
+	if move == entry.move { guess += 100_000 }
+
+	return guess
+}
+
 pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
+	zobrist_key := bot.get_zobrist_key()
 	mut alpha, mut beta := a, b
+	old_alpha := a
 
 	bot.search.nodes++
 	bot.search.pv.set_length(ply)
@@ -97,7 +125,33 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 	mut best_score := -999999
 	mut best_move := null_move
 
-	moves := bot.board.get_moves(false)
+	found_entry := bot.search.tt.lookup(zobrist_key)
+
+	if found_entry.key == zobrist_key && found_entry.depth >= depth {
+		if found_entry.type == .exact || 
+		(found_entry.type == .upperbound && found_entry.score < alpha) ||
+		(found_entry.type == .lowerbound && found_entry.score >= beta) {
+			bot.search.pv.update(found_entry.move, ply)
+			return found_entry.score
+		}
+	}
+
+	mut entry_flag := EntryType.exact
+
+	mut moves := bot.board.get_moves(false)
+
+	moves.sort_with_compare(fn [bot, found_entry] (mv1 &Move, mv2 &Move) int {
+		mv1_score := bot.guess_move_score(mv1, found_entry)
+		mv2_score := bot.guess_move_score(mv2, found_entry)
+
+		if mv1_score > mv2_score { 
+			return -1
+		} else {
+			return 1
+		}
+
+		return 0
+	})
 
 	for move in moves {
 		bot.board.make_move(move)
@@ -120,10 +174,20 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 			}
 		}
 
-		if alpha >= beta { break }
 		if bot.search.overtime { break }
+		if alpha >= beta { 
+			entry_flag = .lowerbound
+			break
+		 }
 	}
 
+	if old_alpha > alpha && entry_flag != .lowerbound {
+		entry_flag = .upperbound
+	}
+
+	if !bot.search.overtime {
+		bot.search.tt.insert(TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag})
+	}
 
 	return best_score
 }

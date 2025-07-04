@@ -8,6 +8,11 @@ pub struct PVTable {
 	line_lengths [max_depth]int
 }
 
+pub fn (mut table PVTable) reset() {
+	table.lines = [max_depth][max_depth]Move{}
+	table.line_lengths = [max_depth]int{}
+}
+
 pub fn (mut table PVTable) update(move Move, ply int) {
 	table.lines[ply][ply] = move
 

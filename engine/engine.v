@@ -76,6 +76,10 @@ pub fn (mut bot Engine) uci_listen() {
 			}
 			'ucinewgame' {
 				bot.board = chess.Board{}
+				bot.search = Search{}
+				bot.board.load_fen(chess.starting_fen)
+				bot.search.tt.clear()
+				bot.search.pv.reset()
 				
 			}
 			'position' {

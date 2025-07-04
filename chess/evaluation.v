@@ -4,8 +4,9 @@ import math { min }
 
 pub fn (board Board) score() int {
 
-  if board.repetitions.is_draw(board.position_hash) || board.draw_counter >= 100 { return 0 }
-
+  // if board.repetitions.is_draw(board.position_hash) || board.draw_counter >= 100 { return 0 }
+  // Untested, come back to this!
+  
   us := board.turn
   opp := us.opp()
 
