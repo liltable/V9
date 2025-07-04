@@ -36,18 +36,11 @@ fn (mut bot Engine) handle_pos(mut args []string) {
 	if args.len > 0 && args[0] == 'moves' {
 		args.delete(0)
 
-		moves := bot.board.get_move_list()
-		last_move := args.last()
+		for move in args {
+			moves := bot.board.get_move_list()
 
-		if last_move in moves {
-			bot.board.make_move(moves[last_move])
-		} else {
-			for move in args {
-				new_moves := bot.board.get_move_list()
-
-				if move in new_moves {
-					bot.board.make_move(moves[move])
-				}
+			if move in moves {
+				bot.board.make_move(moves[move])
 			}
 		}
 	}

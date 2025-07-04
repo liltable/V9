@@ -2,7 +2,6 @@ module engine
 
 import time { StopWatch }
 import chess { Move }
-import math { max } 
 
 const null_move = Move(0)
 
@@ -19,6 +18,7 @@ struct Search
 	overtime bool
 	tt TranspositionTable = TranspositionTable.new(64)
 	pv PVTable
+	root_move Move
 }
 
 pub fn (mut search Search) set_time_limit(limit int) {
@@ -55,32 +55,26 @@ pub fn (mut bot Engine) start_search() {
 pub fn (mut bot Engine) iterate() {
 	mut depth := 1
 	mut input := ''
-	alpha, beta := -9999999, 9999999
-
 	mut completed_searches := []Move{}
+	alpha, beta := -9999999, 9999999
 	
 	for depth < max_depth {
 		bot.search.check_time()
 		input = ''
-
 		bot.search.comms.try_pop(mut input)
-
-		depth++
-		completed_searches << bot.search.pv.best_move()
 		score := bot.negamax(depth, 0, alpha, beta)
-
-		pv := bot.search.pv.mainline()
-
-		if pv.len > 0 {
-			bot.search.comms <- "info depth ${depth} score cp ${score} nodes ${bot.search.nodes} time ${bot.search.timer.elapsed().milliseconds()} pv ${bot.search.pv.mainline()}"
-		}
 
 		if bot.search.overtime || input == 'stop' { 
 			break
 		}
+
+		bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${bot.search.pv.mainline()}"
+
+		completed_searches << bot.search.root_move
+		depth++
 	}
 
-	bot.search.comms <- "bestmove ${bot.search.pv.best_move().lan()}"
+	bot.search.comms <- "bestmove ${completed_searches.last().lan()}"
 	bot.search.active = false
 }
 
@@ -112,6 +106,8 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 		if score > best_score {
 			best_score = score
+
+			if ply == 0 { bot.search.root_move = move }
 
 			if best_score > alpha {
 				alpha = best_score
