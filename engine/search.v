@@ -85,7 +85,11 @@ pub fn (mut bot Engine) iterate() {
 			break
 		}
 
-		bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${bot.search.pv.mainline()}"
+		pv := bot.search.pv.mainline()
+
+		if pv.len > 0 {
+			bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${bot.search.pv.mainline()}"
+		}
 
 		completed_searches << bot.search.pv.best_move()
 		depth++
@@ -109,7 +113,7 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 	mut alpha, mut beta := a, b
 	old_alpha := a
 
-	bot.search.nodes++
+	bot.search.nodes++	
 	bot.search.pv.set_length(ply)
 
 	if (bot.search.nodes & 4095) > 0 {
@@ -127,16 +131,13 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 	found_entry := bot.search.tt.lookup(zobrist_key)
 
-	if found_entry.key == zobrist_key && found_entry.depth >= depth {
-		if found_entry.type == .exact || 
-		(found_entry.type == .upperbound && found_entry.score < alpha) ||
-		(found_entry.type == .lowerbound && found_entry.score >= beta) {
-			bot.search.pv.update(found_entry.move, ply)
-			return found_entry.score
-		}
-	}
-
-	mut entry_flag := EntryType.exact
+	// if found_entry.key == zobrist_key && found_entry.depth >= depth {
+	// 	if found_entry.type == .exact || 
+	// 	(found_entry.type == .upperbound && found_entry.score < alpha) ||
+	// 	(found_entry.type == .lowerbound && found_entry.score >= beta) {
+	// 		return found_entry.score
+	// 	}
+	// }
 
 	mut moves := bot.board.get_moves(false)
 
@@ -152,6 +153,7 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 		return 0
 	})
+
 
 	for move in moves {
 		bot.board.make_move(move)
@@ -174,16 +176,10 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 			}
 		}
 
-		if bot.search.overtime { break }
-		if alpha >= beta { 
-			entry_flag = .lowerbound
-			break
-		 }
+		if bot.search.overtime || alpha >= beta { break }
 	}
 
-	if old_alpha > alpha && entry_flag != .lowerbound {
-		entry_flag = .upperbound
-	}
+	mut entry_flag := if best_score <= old_alpha { EntryType.upperbound } else if best_score >= beta { .lowerbound } else { .exact }
 
 	if !bot.search.overtime {
 		bot.search.tt.insert(TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag})

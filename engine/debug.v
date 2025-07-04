@@ -70,6 +70,22 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		'ttsize' {
 			println('${bot.search.tt.size} entries')
 		}
+		'pv' {
+			println("mainline: ${bot.search.pv.mainline()}")
+			for l, line in bot.search.pv.line_lengths {
+				if line > 0 {
+					for idx in 0 .. line {
+						move := bot.search.pv.lines[l][idx]
+						if move != chess.null_move {
+							print("${bot.search.pv.lines[l][idx].lan()} ")
+							if idx == line - 1 {
+								println("")
+							}	
+						}
+					}
+				}
+			}
+		}
 		else {}
 	}
 }
