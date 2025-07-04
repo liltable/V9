@@ -4,6 +4,8 @@ import chess
 import log
 import os
 
+pub const max_depth = 32
+
 pub struct Engine {
 pub mut:
 	info           EngineInfo
