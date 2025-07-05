@@ -39,6 +39,7 @@ pub fn (mut bot Engine) start_search() {
 	bot.search.active = true
 	bot.search.nodes = 0
 	bot.search.timer.start()
+	bot.search.pv.reset()
 
 	spawn bot.iterate()
 
@@ -87,10 +88,8 @@ pub fn (mut bot Engine) iterate() {
 
 		pv := bot.search.pv.mainline()
 
-		if pv.len > 0 {
-			bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${bot.search.pv.mainline()}"
-		}
-
+		bot.search.comms <- "info depth ${depth} score cp ${score} time ${bot.search.timer.elapsed().milliseconds()} nodes ${bot.search.nodes} pv ${pv}"
+		
 		completed_searches << bot.search.pv.best_move()
 		depth++
 	}
@@ -110,11 +109,12 @@ pub fn (bot Engine) guess_move_score(move Move, entry TranspositionEntry) int {
 
 pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 	zobrist_key := bot.get_zobrist_key()
+	bot.search.pv.set_length(ply)
+
 	mut alpha, mut beta := a, b
 	old_alpha := a
 
 	bot.search.nodes++	
-	bot.search.pv.set_length(ply)
 
 	if (bot.search.nodes & 4095) > 0 {
 		bot.search.check_time()
@@ -124,20 +124,18 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 		return bot.board.score()
 	}
 
-	bot.search.nodes++
-
-	mut best_score := -999999
+	mut best_score := -9999999
 	mut best_move := null_move
 
 	found_entry := bot.search.tt.lookup(zobrist_key)
 
-	// if found_entry.key == zobrist_key && found_entry.depth >= depth {
-	// 	if found_entry.type == .exact || 
-	// 	(found_entry.type == .upperbound && found_entry.score < alpha) ||
-	// 	(found_entry.type == .lowerbound && found_entry.score >= beta) {
-	// 		return found_entry.score
-	// 	}
-	// }
+	if found_entry.key == zobrist_key && ply > 0 && found_entry.depth >= depth {
+		if found_entry.type == .exact || 
+		(found_entry.type == .upperbound && found_entry.score < alpha) ||
+		(found_entry.type == .lowerbound && found_entry.score >= beta) {
+			return found_entry.score
+		}
+	}
 
 	mut moves := bot.board.get_moves(false)
 
@@ -153,7 +151,6 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 		return 0
 	})
-
 
 	for move in moves {
 		bot.board.make_move(move)

@@ -1,7 +1,8 @@
 # Visionary IX (V9)
 
 A UCI compliant chess engine written in the V programming language.\
-Current Version: 0.1
+Current Version: 0.2 (+150 elo)\
+Changelog: Added transposition tables and a simple move ordering scheme with PV-move and TT-move bonuses.
 
 ## Features
 - [x] Legal Move Generation
@@ -9,9 +10,11 @@ Current Version: 0.1
     - [ ] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
-    - [ ] Transposition Tables
+    - [x] Transposition Tables
     - [ ] Move Ordering
-    - [ ] Transposition Cutoffs
+        - [x] PV Move
+        - [x] TT Move
+        - [ ] MVV-LVA
     - [ ] Quiesence Search
     - [ ] Aspiration Windows
 
