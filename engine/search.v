@@ -103,6 +103,7 @@ pub fn (bot Engine) guess_move_score(move Move, entry TranspositionEntry) int {
 
 	if move == bot.search.pv.best_move() { guess += 900_000 }
 	if move == entry.move { guess += 100_000 }
+	if move.is_capture() { guess += 1_000 }
 
 	return guess
 }
