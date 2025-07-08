@@ -109,11 +109,12 @@ pub fn (bot Engine) guess_move_score(move Move, ply int, entry TranspositionEntr
 	return guess
 }
 
-pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
+pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	zobrist_key := bot.get_zobrist_key()
 	bot.search.pv.set_length(ply)
 
 	mut alpha, mut beta := a, b
+	mut depth := d
 	old_alpha := a
 
 	bot.search.nodes++	
@@ -150,6 +151,8 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 		return 0
 	})
+
+	if bot.board.us_in_check() { depth++ }
 
 	for move in moves {
 		bot.board.make_move(move)

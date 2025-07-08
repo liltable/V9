@@ -1,8 +1,8 @@
 # Visionary IX (V9)
 
 A UCI compliant chess engine written in the V programming language.\
-Current Version: 0.4 (+60 elo)\
-Changelog: Added a bonus for killer moves in the sketchy move ordering scheme.
+Current Version: 0.5 (+10 elo)\
+Changelog: Incremented the depth when the side to move is in check in the search loop.
 
 ## Features
 - [x] Legal Move Generation
@@ -17,6 +17,8 @@ Changelog: Added a bonus for killer moves in the sketchy move ordering scheme.
         - [x] Capture Moves (+85 elo)
         - [x] Killer Moves (+60 elo)
         - [ ] Simple History Bonus
+    - [ ] Search Extensions
+        - [x] Check Extensions (+10 elo)
     - [ ] Quiesence Search
     - [ ] Aspiration Windows
 
