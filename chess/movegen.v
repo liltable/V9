@@ -228,7 +228,7 @@ pub fn (b Board) bishop_moves(mut moves []Move, only_captures bool) {
 	for bishops > 0 {
 		bishop := bishops.pop_lsb()
 		piece := b.pieces[bishop]
-		attacks := bishop_attacks(bishop, occupied)
+		attacks := fast_bishop_moves(bishop, occupied)
 		is_pinned := (b.pinned[us] & square_bbs[bishop]) > 0
 
 		mut captures := attacks & enemy
@@ -270,7 +270,7 @@ pub fn (b Board) rook_moves(mut moves []Move, only_captures bool) {
 	for rooks > 0 {
 		rook := rooks.pop_lsb()
 		piece := b.pieces[rook]
-		attacks := rook_attacks(rook, occupied)
+		attacks := fast_rook_moves(rook, occupied)
 		is_pinned := (square_bbs[rook] & b.pinned[us]) > 0
 
 		mut captures := attacks & enemy
@@ -312,7 +312,7 @@ pub fn (b Board) queen_moves(mut moves []Move, only_captures bool) {
 	for queens > 0 {
 		queen := queens.pop_lsb()
 		piece := b.pieces[queen]
-		attacks := queen_attacks(queen, occupied)
+		attacks := fast_queen_moves(queen, occupied)
 		is_pinned := (square_bbs[queen] & b.pinned[us]) > 0
 
 		mut captures := attacks & enemy

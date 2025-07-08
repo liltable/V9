@@ -62,6 +62,14 @@ pub fn (b Bitboard) count() int {
 	return bits.ones_count_64(b)
 }
 
+pub fn (b Bitboard) wrapping_mul(mul Bitboard) Bitboard {
+	return (b * mul) % (Bitboard(1) << 64)
+}
+
+pub fn (b Bitboard) wrapping_sub(sub Bitboard) Bitboard {
+	return (b - sub) % (Bitboard(1) << 64)
+}
+
 pub const file_a = Bitboard(0x101010101010101)
 pub const file_b = Bitboard(0x202020202020202)
 pub const file_c = Bitboard(0x404040404040404)
