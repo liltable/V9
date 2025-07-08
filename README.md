@@ -1,8 +1,8 @@
 # Visionary IX (V9)
 
 A UCI compliant chess engine written in the V programming language.\
-Current Version: 0.3 (+85 elo)\
-Changelog: Added a bonus for capture moves in the sketchy move ordering scheme.
+Current Version: 0.4 (+60 elo)\
+Changelog: Added a bonus for killer moves in the sketchy move ordering scheme.
 
 ## Features
 - [x] Legal Move Generation
@@ -14,7 +14,9 @@ Changelog: Added a bonus for capture moves in the sketchy move ordering scheme.
     - [ ] Move Ordering
         - [x] PV Move
         - [x] TT Move
-        - [ ] Capture Moves
+        - [x] Capture Moves (+85 elo)
+        - [x] Killer Moves (+60 elo)
+        - [ ] Simple History Bonus
     - [ ] Quiesence Search
     - [ ] Aspiration Windows
 
@@ -32,5 +34,5 @@ how do i default dance using markdown
 - tabledotnet (me lmao)
 - [chess programming discord](https://discord.com/invite/F6W6mMsTGN)
 - [stockfish discord](https://discord.gg/GWDRS3kU6R)
-- bbc chess engine series by [maksim korzh](https://github.com/maksimkorzh)
-- chess coding adventure series by [sebastian lague](https://github.com/seblague)
+- bbc chess engine series by [maksim korzh](https://github.com/maksimkorzh/bbc)
+- chess coding adventure series by [sebastian lague](https://github.com/seblague/chess-coding-adventure)

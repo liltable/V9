@@ -18,7 +18,7 @@ struct Search
 	overtime bool
 	tt TranspositionTable = TranspositionTable.new(64)
 	pv PVTable
-	root_move Move
+	killers [max_depth]Move
 }
 
 pub fn (mut search Search) set_time_limit(limit int) {
@@ -98,11 +98,12 @@ pub fn (mut bot Engine) iterate() {
 	bot.search.active = false
 }
 
-pub fn (bot Engine) guess_move_score(move Move, entry TranspositionEntry) int {
+pub fn (bot Engine) guess_move_score(move Move, ply int, entry TranspositionEntry) int {
 	mut guess := 0
 
 	if move == bot.search.pv.best_move() { guess += 900_000 }
-	if move == entry.move { guess += 100_000 }
+	if move == entry.move { guess += 400_000 }
+	if bot.search.killers[ply] == move { guess += 50_000 }
 	if move.is_capture() { guess += 1_000 }
 
 	return guess
@@ -140,15 +141,12 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 
 	mut moves := bot.board.get_moves(false)
 
-	moves.sort_with_compare(fn [bot, found_entry] (mv1 &Move, mv2 &Move) int {
-		mv1_score := bot.guess_move_score(mv1, found_entry)
-		mv2_score := bot.guess_move_score(mv2, found_entry)
+	moves.sort_with_compare(fn [bot, ply, found_entry] (mv1 &Move, mv2 &Move) int {
+		mv1_score := bot.guess_move_score(mv1, ply, found_entry)
+		mv2_score := bot.guess_move_score(mv2, ply, found_entry)
 
-		if mv1_score > mv2_score { 
-			return -1
-		} else {
-			return 1
-		}
+		if mv1_score > mv2_score { return -1 }
+		if mv1_score < mv2_score { return 1 }
 
 		return 0
 	})
@@ -161,8 +159,6 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 		if score > best_score {
 			best_score = score
 
-			if ply == 0 { bot.search.root_move = move }
-
 			if best_score > alpha {
 				alpha = best_score
 
@@ -174,7 +170,12 @@ pub fn (mut bot Engine) negamax(depth int, ply int, a int, b int) int {
 			}
 		}
 
-		if bot.search.overtime || alpha >= beta { break }
+		if bot.search.overtime { break }
+
+		if alpha >= beta {
+			if ply > 0 { bot.search.killers[ply] = move }
+			break
+		}
 	}
 
 	mut entry_flag := if best_score <= old_alpha { EntryType.upperbound } else if best_score >= beta { .lowerbound } else { .exact }
