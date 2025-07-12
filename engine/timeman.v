@@ -49,9 +49,9 @@ pub fn (bot Engine) choose_time_limit(time_control TimeControl) int {
 
 	my_time_remaining := time_control.time_remaining[us]
 	my_time_increment := time_control.increments[us]
-	min_think_time := min(100, my_time_remaining / 4)
+	min_think_time := max(50, my_time_remaining / 4)
 
-	mut time_limit := my_time_remaining / 10
+	mut time_limit := my_time_remaining / 6
 
 	if my_time_remaining > my_time_increment * 2 {
 		time_limit += my_time_increment * 80 / 100
