@@ -10,6 +10,35 @@ pub enum SpecialType {
 }
 
 pub type Move = u32
+pub const max_moves = 218
+
+pub struct MoveList {
+	pub mut:
+	count int
+	mut:
+	moves [max_moves]Move
+	pointer int
+}
+
+pub fn (mut list MoveList) add_move(move Move) {
+	if list.count < max_moves {
+		list.moves[list.count] = move
+		list.count++
+	}
+}
+
+pub fn (list MoveList) get_move(index int) Move {
+	if index < list.count {
+		return list.moves[index]
+	}
+
+	return null_move
+}
+
+pub fn (mut list MoveList) clear() {
+	list.count = 0
+	list.moves = [max_moves]Move{}
+}
 
 pub const null_move = Move(0)
 /*

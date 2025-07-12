@@ -130,28 +130,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	mut best_score := -9999999
 	mut best_move := null_move
 
-	mut moves := bot.board.get_moves(false)
+	// write staged move generation, then use manual move looping for search
 
-	for move in moves {
-		bot.board.make_move(move)
-		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
-		bot.board.undo_move()
-
-		if score > best_score {
-			best_score = score
-
-			if best_score > alpha {
-				alpha = best_score
-				best_move = move
-
-				bot.search.pv.update(best_move, ply)
-			}
-		}
-
-		if alpha >= beta {
-			break
-		}
-	}
-	
 	return best_score
 }

@@ -79,7 +79,8 @@ pub fn (mut b Board) move_piece(from int, to int) {
 
 		f := square_bbs[from]
 		t := square_bbs[to]
-		// move := square_bbs[from] | square_bbs[to]
+		// move := square_bbs[from] | square_bbs[to] 
+		// ^^^ this broke for me for some reason, no quick XORing :(
 
 		b.bitboards[piece.type()] &= ~f
 		b.bitboards[piece.type()] |= t
