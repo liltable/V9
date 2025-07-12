@@ -4,6 +4,7 @@ import time { StopWatch }
 import chess { Move, Bitboard, Color }
 
 const null_move = Move(0)
+const global_tt_size_mb = 128
 
 struct Search	
 {
@@ -39,7 +40,7 @@ pub fn (mut bot Engine) start_search() {
 	bot.search.timer.start()
 	bot.search.pv.reset()
 
-	spawn bot.iterate()
+	go bot.iterate()
 
 	for {
 		output := <-bot.search.comms or { continue }
@@ -94,8 +95,18 @@ pub fn (mut bot Engine) iterate() {
 		depth++
 	}
 
-	bot.search.comms <- "bestmove ${completed_searches.last().lan()}"
+	// ensures that we NEVER not have a move even if we're using like 1ms to think
+	result := if completed_searches.len > 0 { completed_searches.last() } else { 
+		if bot.search.pv.best_move() != null_move {
+			bot.search.pv.best_move()
+		} else {
+			bot.random_move()
+		}
+	}
+
+	bot.search.comms <- "bestmove ${result.lan()}"
 	bot.search.active = false
+	bot.search.timer.stop()
 }
 
 pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
@@ -134,7 +145,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 				best_move = move
 
 				bot.search.pv.update(best_move, ply)
-	
 			}
 		}
 

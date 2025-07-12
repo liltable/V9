@@ -4,11 +4,18 @@ A UCI compliant chess engine written in the V programming language.\
 Current Version: 0.1\
 
 ## Features
+This list is modeled after the [pinned message](https://discord.com/channels/435943710472011776/882956631514689597/1256706716515565638) in the Stockfish Discord channel. More features will be added as progression continues.
 - [x] Legal Move Generation
     - [x] Precalculated Leaper Attacks
     - [x] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
+    - [ ] Move Ordering (MVV-LVA)
+    - [ ] Quiesence Search
+    - [ ] Transposition Tables
+    - [ ] Butterfly History Tables
+    - [ ] Principal Variation Search
+    - [ ] Aspiration Windows
 
 ## Notes
 this takes so long to get right\

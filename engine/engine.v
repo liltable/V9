@@ -10,12 +10,9 @@ pub mut:
 	info           EngineInfo
 	board          chess.Board
 	search 		   Search
+	tt 				TranspositionTable = TranspositionTable.new(global_tt_size_mb)
 	stdin          chan string
 	output         chan string
-}
-
-pub fn Engine.new() Engine {
-	return Engine{EngineInfo{}, chess.Board{}, Search{} chan string{}, chan string{}}
 }
 
 pub fn (mut bot Engine) uci_respond(output chan string) {
