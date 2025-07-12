@@ -82,7 +82,7 @@ pub fn (mut bot Engine) iterate() {
 
 		time_taken := bot.search.timer.elapsed().milliseconds()
 
-		if depth > 2 && (time_taken > bot.search.time_limit || input == 'stop') { 
+		if time_taken > bot.search.time_limit || input == 'stop' { 
 			break
 		}
 
@@ -108,6 +108,8 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		bot.search.check_time()
 	}
 
+	if depth > 2 && bot.search.overtime { return alpha }
+
 	bot.search.nodes++	
 
 	if depth <= 0 {
@@ -120,8 +122,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	mut moves := bot.board.get_moves(false)
 
 	for move in moves {
-		if depth > 2 && bot.search.overtime { return 99999 }
-
 		bot.board.make_move(move)
 		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
 		bot.board.undo_move()

@@ -1,7 +1,5 @@
 module chess
 
-import log
-
 pub const starting_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 pub const kiwipete_fen = 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1'
 pub const qpo_chigorin_fen = 'r1bqkbnr/ppp2ppp/2n1p3/3p4/2PP4/4PN2/PP3PPP/RNBQKB1R b KQkq c3 0 4'
@@ -53,10 +51,6 @@ pub fn (mut b Board) add_piece(piece Piece, at int) {
 		b.occupancies[Occupancies.both] |= bit
 
 		b.position_hash ^= zobrist.read_piece(piece, at)
-
-		log.debug('Inserted a ${piece.color()} ${piece.type()} ${square_names[at]}.')
-	} else {
-		log.warn('Attempted to insert a ${piece.color()} ${piece.type()} at occupied square in ${square_names[at]}')
 	}
 }
 
@@ -72,12 +66,6 @@ pub fn (mut b Board) remove_piece(at int) Piece {
 	b.occupancies[Occupancies.both] &= ~bit
 
 	b.position_hash ^= zobrist.read_piece(piece, at)
-
-	if piece == null_piece {
-		log.warn('Attempted to remove a null piece on ${square_names[at]}.')
-	} else {
-		log.debug('Removed a ${piece.color()} ${piece.type()} from the board on ${square_names[at]}.')
-	}
 
 	return piece
 }
@@ -104,11 +92,6 @@ pub fn (mut b Board) move_piece(from int, to int) {
 
 		b.position_hash ^= zobrist.read_piece(piece, from)
 		b.position_hash ^= zobrist.read_piece(piece, to)
-
-		log.debug('Moved a ${piece.color()} ${piece.type()} from ${square_names[from]} to ${square_names[to]}')
-	} else {
-		b.print()
-		log.warn("Attempted to move a piece that wasn't on it's indicated square (${square_names[from]}).")
 	}
 }
 
@@ -138,7 +121,8 @@ pub fn (mut b Board) load_fen(fen string) {
 							b.add_piece(Piece.new(color, type), index)
 							file++
 						} else {
-							log.error("Invalid character token '${token}' found.\nFEN: ${fen}")
+							eprintln("Invalid character token '${token}' found.\nFEN: ${fen}")
+							exit(1)
 						}
 					}
 				}
@@ -146,9 +130,6 @@ pub fn (mut b Board) load_fen(fen string) {
 			1 {
 				if aspect in color_symbols {
 					b.turn = symbol_to_color[aspect.to_lower()]
-					log.debug('Set the current board turn to ${b.turn} as per the loading FEN.')
-				} else {
-					log.debug('Missing a specified color in the currently loading fen. Defaulting to white...')
 				}
 			}
 			2 {
@@ -157,26 +138,22 @@ pub fn (mut b Board) load_fen(fen string) {
 					match token {
 						'K' {
 							b.castling_rights |= white_kingside_right
-							log.debug('Set the kingside right for white.')
 						}
 						'k' {
 							b.castling_rights |= black_kingside_right
-							log.debug('Set the kingside right for black.')
 						}
 						'Q' {
 							b.castling_rights |= white_queenside_right
-							log.debug('Set the queenside right for white.')
 						}
 						'q' {
 							b.castling_rights |= black_queenside_right
-							log.debug('Set the queenside right for black.')
 						}
 						'-' {
-							log.warn('No castling rights detected in the loading FEN. Defaulting to full...')
 							b.castling_rights = all_castling_rights
 						}
 						else {
-							log.warn('Invalid token ${token} found in castling rights segment of the loading FEN. Castling rights may be inaccurate.\nFEN: ${fen}')
+							eprintln('Invalid token ${token} found in castling rights segment of the loading FEN. \nFEN: ${fen}')
+							exit(1)
 						}
 					}
 				}
@@ -187,34 +164,25 @@ pub fn (mut b Board) load_fen(fen string) {
 
 				if file in file_symbols {
 					b.en_passant_file = symbol_to_file[file]
-					log.debug('Set the en-passant file to the ${file} file from the square ${aspect}.')
-				} else {
-					log.debug('No en-passant square detected from the loading FEN string.')
 				}
 			}
 			4 {
 				if aspect == '-' {
-					log.warn('No halfmoves detected from the loading FEN. Defaulting to zero...')
 					b.draw_counter = 0
 				} else if aspect.is_int() {
 					b.draw_counter = aspect.int()
-					log.debug('Set the halfmove counter to ${aspect.int()} as indicated from the loading FEN.')
 				}
 			}
 			5 {
 				if aspect == '-' {
-					log.warn('No move counter detected from the loading FEN. Defaulting to zero...')
 					b.draw_counter = 0
 				} else if aspect.is_int() {
 					b.move_counter = aspect.int()
-					log.debug('Set the fullmove counter to ${aspect.int()} as indicated from the loading FEN.')
 				}
 			}
 			else {}
 		}
 	}
-
-	log.debug("FEN '${fen}' loaded.")
 
 	b.update_attacks()
 	b.recalc_pos_hash()
@@ -265,7 +233,6 @@ pub fn (b Board) get_fen() string {
 
 	s += ' ${castling_rights}'
 
-	log.warn("Haven't handled en-passant detection yet, therefore can't include it in the current board's FEN string.")
 
 	s += ' -'
 
@@ -301,13 +268,7 @@ pub fn (b Board) str() string {
 }
 
 pub fn (b Board) print() {
-	log.info(b.str())
-}
-
-pub fn (b Board) print_stdout() {
-	log.debug('Printed the pretty-board to stdout.')
-	log.info(b.str())
-	println(b)
+	println(b.str())
 }
 
 pub fn (b Board) get_square_attackers(sq int, blockers Bitboard) Bitboard {
@@ -394,7 +355,7 @@ pub fn (mut b Board) make_move(move Move) {
 			targeted := b.pieces[target]
 
 			if target == null_piece || targeted != Piece.new(opp, .pawn) {
-				b.print_stdout()
+				b.print()
 				println(move.lan())
 				panic('wtf')
 			}
@@ -468,8 +429,6 @@ pub fn (mut b Board) make_move(move Move) {
 	b.history << move
 	b.repetitions.increment(b.position_hash)
 
-	log.debug('Played move ${move.lan()} for ${b.turn}.')
-
 	b.turn = b.turn.opp()
 }
 
@@ -495,9 +454,8 @@ pub fn (mut b Board) undo_move() {
 	b.en_passant_file = old_state.en_passant_file
 
 	if b.pieces[to] == null_piece && special != .en_passant {
-		log.warn('Mailbox-Bitboard mismatch. Asserting that mailbox is incorrect.')
+		// Mailbox Bitboard mismatch, always assert that the mailbox is wrong and correct it using the bitboards
 		b.pieces[to] = piece
-		log.warn('Inserted a ${piece.color()} ${piece.type()} at ${square_names[to]} to correct the mailbox.')
 	}
 
 	assert b.pieces[to] != null_piece
@@ -530,8 +488,6 @@ pub fn (mut b Board) undo_move() {
 
 		b.add_piece(Piece.new(us, .pawn), from)
 	}
-
-	log.debug('Undid move ${move.lan()} for ${us}')
 
 	b.turn = b.turn.opp()
 

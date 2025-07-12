@@ -7,31 +7,31 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 
 	match args[0] {
 		'occbb' {
-			bot.board.occupancies[chess.Occupancies.both].print_stdout()
+			bot.board.occupancies[chess.Occupancies.both].print()
 		}
 		'turn' {
 			println(bot.board.turn)
 		}
 		'occopp' {
-			bot.board.occupancies[bot.board.turn.opp()].print_stdout()
+			bot.board.occupancies[bot.board.turn.opp()].print()
 		}
 		'occturn' {
-			bot.board.occupancies[bot.board.turn].print_stdout()
+			bot.board.occupancies[bot.board.turn].print()
 		}
 		'atkrook' {
 			args.delete(0)
 
 			if args[0] in chess.square_names.map(it.str()) {
-				chess.rook_attacks(chess.square_names.map(it.str()).index(args[0]), bot.board.occupancies[chess.Occupancies.both]).print_stdout()
+				chess.rook_attacks(chess.square_names.map(it.str()).index(args[0]), bot.board.occupancies[chess.Occupancies.both]).print()
 			}
 		}
 		'pinned' {
 			for bb in bot.board.pinned {
-				bb.print_stdout()
+				bb.print()
 			}
 		}
 		'check' {
-			bot.board.checkray.print_stdout()
+			bot.board.checkray.print()
 			println(bot.board.checkers)
 		}
 		'update' {
@@ -55,7 +55,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		}
 		'undo' {
 			bot.board.undo_move()
-			bot.board.print_stdout()
+			bot.board.print()
 		}
 		'move' {
 			args.delete(0)
@@ -64,12 +64,12 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 
 			if args[0] in moves {
 				bot.board.make_move(moves[args[0]])
-				bot.board.print_stdout()
+				bot.board.print()
 			}
 		}
-		'ttsize' {
-			println('${bot.search.tt.size} entries')
-		}
+		// 'ttsize' {
+		// 	println('${bot.search.tt.size} entries')
+		// }
 		'pv' {
 			println("mainline: ${bot.search.pv.mainline()}")
 			for l, line in bot.search.pv.line_lengths {

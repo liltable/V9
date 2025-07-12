@@ -1,7 +1,6 @@
 module engine
 
 import chess
-import log
 import rand { element }
 
 fn (mut bot Engine) handle_uci() {
@@ -56,8 +55,6 @@ fn (mut bot Engine) handle_go(mut args []string) {
 
 		if depth.is_int() {
 			bot.perft(depth.int())
-		} else {
-			log.warn("Invalid depth argument '${depth}' when asking for bot perft.")
 		}
 	} else {
 		time_control := TimeControl.parse(mut args)

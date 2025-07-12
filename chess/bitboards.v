@@ -1,6 +1,5 @@
 module chess
 
-import log
 import math.bits
 
 pub type Bitboard = u64
@@ -108,31 +107,6 @@ pub const all_ranks = [rank_1, rank_2, rank_3, rank_4, rank_5, rank_6, rank_7, r
 pub const four_corners = Bitboard(0x8100000000000081)
 
 pub fn (b Bitboard) print() {
-	mut s := '\n'
-	for rank := 7; rank >= 0; rank-- {
-		for file := 0; file <= 7; file++ {
-			index := rank * 8 + file
-			bit := (Bitboard(1) << index)
-
-			if file == 0 {
-				s += (rank + 1).str() + ' |'
-			}
-
-			if (b & bit) > 0 {
-				s += ' # '
-			} else {
-				s += ' . '
-			}
-		}
-
-		s += '\n'
-	}
-
-	s += '    a  b  c  d  e  f  g  h'
-	log.debug(s)
-}
-
-pub fn (b Bitboard) print_stdout() {
 	mut s := '\n'
 	for rank := 7; rank >= 0; rank-- {
 		for file := 0; file <= 7; file++ {

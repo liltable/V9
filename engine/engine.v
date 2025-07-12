@@ -1,7 +1,6 @@
 module engine
 
 import chess
-import log
 import os
 
 pub const max_depth = 32
@@ -10,37 +9,18 @@ pub struct Engine {
 pub mut:
 	info           EngineInfo
 	board          chess.Board
-	logger         log.Log
 	search 		   Search
 	stdin          chan string
 	output         chan string
 }
 
 pub fn Engine.new() Engine {
-	mut logger := log.Log{}
-
-	logger.set_level(if '-debug' in os.args { .debug } else { .info })
-	os.rm('./v9_debug.log') or { logger.warn("Couldn't delete the old logging file at startup.") }
-	logger.set_output_path('./v9_debug.log')
-
-	log.set_logger(&logger)
-
-	return Engine{EngineInfo{}, chess.Board{}, &logger, Search{} chan string{}, chan string{}}
-}
-
-pub fn (mut bot Engine) log_input(input string) {
-	bot.logger.debug("Received input: '${input}'")
-}
-
-pub fn (mut bot Engine) log_response(output string) {
-	bot.logger.debug("Sent output: '${output}'")
-	bot.logger.flush()
+	return Engine{EngineInfo{}, chess.Board{}, Search{} chan string{}, chan string{}}
 }
 
 pub fn (mut bot Engine) uci_respond(output chan string) {
 	for {
 		response := <-output
-		bot.log_response(response)
 		println(response)
 	}
 }
@@ -62,9 +42,6 @@ pub fn (mut bot Engine) uci_listen() {
 		input := <-bot.stdin or { '' }
 
 		mut args := input.split_by_space()
-
-		bot.log_input(input)
-
 		mut command := if args.len > 0 { args[0] } else { input }
 
 		match command.to_lower() {
@@ -86,7 +63,7 @@ pub fn (mut bot Engine) uci_listen() {
 				bot.handle_go(mut args)
 			}
 			'print' {
-				bot.board.print_stdout()
+				bot.board.print()
 			}
 			'debug' {
 				bot.handle_debug(mut args)
@@ -103,7 +80,8 @@ pub fn (mut bot Engine) uci_listen() {
 				}
 			}
 			else {
-				log.warn("Received unknown command: '${command}'")
+				// println("Received unknown command: '${command}'")
+				// do nothing
 			}
 		}
 	}
