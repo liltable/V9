@@ -434,6 +434,8 @@ pub fn (mut b Board) make_move(move Move) {
 }
 
 pub fn (mut b Board) undo_move() {
+	b.repetitions.decrement(b.position_hash)
+	
 	move := b.history.pop()
 	old_state := b.states.pop()
 
@@ -493,8 +495,6 @@ pub fn (mut b Board) undo_move() {
 	b.turn = b.turn.opp()
 
 	assert b.turn == us
-
-	b.repetitions.decrement(b.position_hash)
 }
 
 pub fn (mut board Board) us_in_check() bool {
