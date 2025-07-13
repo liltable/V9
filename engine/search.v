@@ -91,13 +91,15 @@ pub fn (mut bot Engine) iterate() {
 		pv := bot.search.pv.mainline()
 		time_taken := bot.search.timer.elapsed().milliseconds()
 
-		if time_taken >= bot.search.time_limit || input == 'stop' || bot.search.overtime { 
+		if input == 'stop' || bot.search.overtime { 
 			break
 		}
 
 		bot.search.comms <- "info depth ${depth} score cp ${score} time ${time_taken} nodes ${bot.search.nodes} pv ${pv}"
 
 		completed_searches << bot.search.pv.best_move()
+
+		if time_taken > bot.search.time_limit / 2 { break }
 		depth++
 	}
 
