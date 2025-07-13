@@ -1,7 +1,7 @@
 module engine
 
 import time { StopWatch }
-import chess { Move, Bitboard, Color }
+import chess { Move, Bitboard, Color, MoveList }
 
 const null_move = Move(0)
 const global_tt_size_mb = 128
@@ -137,34 +137,38 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	mut best_score := -9999999
 	mut best_move := null_move
+	mut move_picker := MovePicker{MoveList{}, .gen_captures, &bot.board}
+	mut moves_searched := 0
 
-	mut move_list := bot.board.get_moves(.all)
-	mut move_being_searched := move_list.get_move(0)
+	for {
+		move := move_picker.next_move()
+		if move == null_move || bot.search.overtime { break }
 
-	for move_being_searched != null_move {
-		bot.board.make_move(move_being_searched)
+		bot.board.make_move(move)
 		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
 		bot.board.undo_move()
+
+		moves_searched++
 
 		if score > best_score {
 			best_score = score
 
-			if best_score > alpha {
-				alpha = best_score
-				best_move = move_being_searched
+			if score > alpha {
+				alpha = score
+
+				if alpha >= beta { break }
+
+				best_move = move
 
 				bot.search.pv.update(best_move, ply)
+				
 			}
 		}
-
-		if alpha >= beta || bot.search.overtime { break }
-
-		move_being_searched = move_list.next()
 	}
 
-	if best_score == -9999999 {
+	if moves_searched == 0 {
 		if bot.board.direct_check() {
-			return ply + best_score
+			return ply + best_score 
 		} else {
 			return 0 
 		}

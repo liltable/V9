@@ -7,7 +7,7 @@ pub struct MoveList {
 	pub mut:
 	count int
 	moves [max_moves]Move
-	pointer int
+	pointer int = -1
 }
 
 pub fn (mut list MoveList) add_move(move Move) {
