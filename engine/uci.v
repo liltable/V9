@@ -80,6 +80,6 @@ pub fn (mut bot Engine) handle_quit() {
 }
 
 pub fn (mut bot Engine) random_move() chess.Move {
-	moves := bot.board.get_moves(false)
+	moves := bot.board.get_moves(.all).to_array()
 	return element(moves) or { moves[0] }
 }

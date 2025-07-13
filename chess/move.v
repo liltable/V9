@@ -10,36 +10,6 @@ pub enum SpecialType {
 }
 
 pub type Move = u32
-pub const max_moves = 218
-
-pub struct MoveList {
-	pub mut:
-	count int
-	mut:
-	moves [max_moves]Move
-	pointer int
-}
-
-pub fn (mut list MoveList) add_move(move Move) {
-	if list.count < max_moves {
-		list.moves[list.count] = move
-		list.count++
-	}
-}
-
-pub fn (list MoveList) get_move(index int) Move {
-	if index < list.count {
-		return list.moves[index]
-	}
-
-	return null_move
-}
-
-pub fn (mut list MoveList) clear() {
-	list.count = 0
-	list.moves = [max_moves]Move{}
-}
-
 pub const null_move = Move(0)
 /*
 MOVE ENCODING
@@ -104,4 +74,52 @@ pub fn (m Move) is_capture() bool {
 
 pub fn (m Move) lan() string {
 	return '${square_names[m.from_square()]}${square_names[m.to_square()]}${piecetype_symbols[(m & move_promo_mask) >> 20]}'
+}
+
+// stolen from Position::legal() in stockfish
+pub fn (board Board) move_is_legal(move Move) bool {
+	us := board.turn
+	opp := us.opp()
+	from := move.from_square()
+	to := move.to_square()
+	piece := move.piece()
+	occupied := board.occupancies[Occupancies.both]
+
+	our_king := board.bitboards[Bitboards.kings] & board.occupancies[us]
+
+	assert piece.color() == us
+	assert board.pieces[our_king.lsb()] == Piece.new(us, .king) 
+
+
+	// [if en-passant] make sure en-passant is still valid and that we're not in check after making the move
+	if move.special() == .en_passant {
+		captured_square := square_bbs[to].forward(opp)
+		occ_after_cap := (occupied ^ square_bbs[from] ^ captured_square) | square_bbs[to]
+
+		assert (square_bbs[to] & board.en_passant_file) > 0
+		assert piece == Piece.new(us, .pawn)
+		assert board.pieces[captured_square.lsb()] == Piece.new(opp, .pawn)
+		assert board.pieces[to] == null_piece
+
+		return board.get_square_attackers(our_king.lsb(), occ_after_cap) == empty_bb
+	}
+
+	// [if castle] make sure the castle path is clear and free from attackers
+	if move.castle() != .none {
+		mut in_between := ray_attacks[from][to]
+
+		if (in_between & occupied) > 0 { return false }
+
+		for in_between > 0 {
+			if board.get_square_attackers(in_between.pop_lsb(), occupied) > 0 { return false }
+		}
+	}
+
+	// [if king] make sure the square we're moving to isn't attacked
+	if board.pieces[from].type() == .king {
+		return board.get_square_attackers(to, occupied ^ square_bbs[from]) == empty_bb
+	}
+
+	// [if none of the above] make sure we're not pinned, and if we are that we're moving along the pinray for the piece
+	return (board.pinned[us] & square_bbs[from]) == empty_bb || (board.pinray[from] & square_bbs[to]) > 0
 }

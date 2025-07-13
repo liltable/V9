@@ -29,7 +29,6 @@ pub mut:
 	history         []Move
 	states          []StateHistory
 	position_hash   Bitboard
-	repetitions RepetitionTable
 }
 
 pub fn (mut b Board) recalc_pos_hash() {
@@ -428,7 +427,7 @@ pub fn (mut b Board) make_move(move Move) {
 	b.move_piece(from, to)
 
 	b.history << move
-	b.repetitions.increment(b.position_hash)
+
 
 	b.turn = b.turn.opp()
 }
@@ -493,8 +492,6 @@ pub fn (mut b Board) undo_move() {
 	b.turn = b.turn.opp()
 
 	assert b.turn == us
-
-	b.repetitions.decrement(b.position_hash)
 }
 
 pub fn (mut board Board) us_in_check() bool {

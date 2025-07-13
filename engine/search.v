@@ -83,15 +83,17 @@ pub fn (mut bot Engine) iterate() {
 
 		time_taken := bot.search.timer.elapsed().milliseconds()
 
-		if time_taken > bot.search.time_limit || input == 'stop' { 
-			break
-		}
+		// i have no idea why i do this
 
 		pv := bot.search.pv.mainline()
 
 		bot.search.comms <- "info depth ${depth} score cp ${score} time ${time_taken} nodes ${bot.search.nodes} pv ${pv}"
 		
 		completed_searches << bot.search.pv.best_move()
+
+		if time_taken > bot.search.time_limit || input == 'stop' || bot.search.overtime { 
+			break
+		}
 		depth++
 	}
 
@@ -130,7 +132,37 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	mut best_score := -9999999
 	mut best_move := null_move
 
-	// write staged move generation, then use manual move looping for search
+	mut move_list := bot.board.get_moves(.all)
+	mut move_being_searched := move_list.get_move(0)
+
+	for move_being_searched != null_move {
+		bot.board.make_move(move_being_searched)
+		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
+		bot.board.undo_move()
+
+		if score > best_score {
+			best_score = score
+
+			if best_score > alpha {
+				alpha = best_score
+				best_move = move_being_searched
+
+				bot.search.pv.update(best_move, ply)
+			}
+		}
+
+		if alpha >= beta || bot.search.overtime { break }
+
+		move_being_searched = move_list.next()
+	}
+
+	if best_score == -9999999 {
+		if bot.board.us_in_check() {
+			return ply + best_score
+		} else {
+			return 0 
+		}
+	}
 
 	return best_score
 }

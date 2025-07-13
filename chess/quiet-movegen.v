@@ -1,6 +1,12 @@
 module chess
 
-pub fn (mut b Board) get_moves(only_captures bool) MoveList {
+pub enum MovegenType {
+	quiets
+	captures
+	all
+}
+
+pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 	b.update_attacks()
 
 	mut list := MoveList{}
@@ -10,15 +16,28 @@ pub fn (mut b Board) get_moves(only_captures bool) MoveList {
 		return list
 	}
 
-	match only_captures {
-		true {
+	// broken repetition table, can only use halfmove counter for draw detection rn
+
+	if b.draw_counter >= 100 {
+		return list
+	}
+
+	match type {
+		.quiets {
+			b.pawn_quiets(mut &list)
+			b.knight_quiets(mut &list)
+			b.bishop_quiets(mut &list)
+			b.rook_quiets(mut &list)
+			b.queen_quiets(mut &list)
+		}
+		.captures {
 			b.pawn_captures(mut &list)
 			b.knight_captures(mut &list)
 			b.bishop_captures(mut &list)
 			b.rook_captures(mut &list)
 			b.queen_captures(mut &list)
 		}
-		false {
+		.all {
 			b.pawn_quiets(mut &list)
 			b.pawn_captures(mut &list)
 
@@ -36,13 +55,15 @@ pub fn (mut b Board) get_moves(only_captures bool) MoveList {
 		}
 	}
 
+	b.king_moves(mut &list)
+
 	return list
 }
 
 pub fn (mut b Board) get_move_list() map[string]Move {
 	mut list := map[string]Move{}
 
-	moves := b.get_moves(false)
+	moves := b.get_moves(.all)
 
 	for idx in 0 .. moves.count {
 		move := moves.get_move(idx)

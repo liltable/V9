@@ -7,7 +7,7 @@ fn (mut bot Engine) internal_perft(depth int) int {
 		return 1
 	}
 
-	moves := bot.board.get_moves(false)
+	moves := bot.board.get_moves(.all).to_array()
 
 	if depth == 1 {
 		return moves.len
@@ -31,7 +31,7 @@ pub fn (mut bot Engine) perft(depth int) {
 
 	timer.start()
 
-	moves := bot.board.get_moves(false)
+	moves := bot.board.get_moves(.all).to_array()
 
 	for move in moves {
 		bot.board.make_move(move)

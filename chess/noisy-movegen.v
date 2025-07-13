@@ -4,6 +4,7 @@ pub fn (board Board) pawn_captures(mut list MoveList) {
 	us := board.turn
 	opp := us.opp()
 	enemy := board.occupancies[opp]
+	empty := ~board.occupancies[Occupancies.both]
 	our_pawns := board.bitboards[Bitboards.pawns] & board.occupancies[us]
 	attacks := pawn_attacks[us]
 	promotion_rank := if us == .white { rank_7 } else { rank_2 }
@@ -20,7 +21,7 @@ pub fn (board Board) pawn_captures(mut list MoveList) {
 		is_pinned := (pinned & square_bbs[pawn]) > 0
 
 		mut targets := attacks[pawn] & enemy
-		mut capture_ep := attacks[pawn] & board.en_passant_file
+		mut capture_ep := attacks[pawn] & board.en_passant_file & empty
 
 		if in_check {
 			targets &= board.checkray
