@@ -502,3 +502,9 @@ pub fn (mut board Board) us_in_check() bool {
 
 	return board.checkers > 1
 }
+
+pub fn (board Board) direct_check() bool {
+	our_king := board.bitboards[Bitboards.kings] & board.occupancies[board.turn]
+
+	return board.get_square_attackers(our_king.lsb(), board.occupancies[Occupancies.both]) != empty_bb
+}

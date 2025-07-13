@@ -88,20 +88,16 @@ pub fn (mut bot Engine) iterate() {
 		input = ''
 		bot.search.comms.try_pop(mut input)
 		score := bot.negamax(depth, 0, alpha, beta)
-
+		pv := bot.search.pv.mainline()
 		time_taken := bot.search.timer.elapsed().milliseconds()
 
-		// i have no idea why i do this
-
-		pv := bot.search.pv.mainline()
-
-		bot.search.comms <- "info depth ${depth} score cp ${score} time ${time_taken} nodes ${bot.search.nodes} pv ${pv}"
-		
-		completed_searches << bot.search.pv.best_move()
-
-		if time_taken > bot.search.time_limit || input == 'stop' || bot.search.overtime { 
+		if time_taken >= bot.search.time_limit || input == 'stop' || bot.search.overtime { 
 			break
 		}
+
+		bot.search.comms <- "info depth ${depth} score cp ${score} time ${time_taken} nodes ${bot.search.nodes} pv ${pv}"
+
+		completed_searches << bot.search.pv.best_move()
 		depth++
 	}
 
@@ -165,7 +161,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	if best_score == -9999999 {
-		if bot.board.us_in_check() {
+		if bot.board.direct_check() {
 			return ply + best_score
 		} else {
 			return 0 
