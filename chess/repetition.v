@@ -19,6 +19,6 @@ fn (mut table RepetitionTable) decrement(position Bitboard) {
 	}
 }
 
-fn (table RepetitionTable) is_draw(position Bitboard) bool {
-	return position in table.entries && table.entries[position] >= 3
+pub fn (table RepetitionTable) is_draw(position Bitboard) bool {
+	return position in table.entries && table.entries[position] >= 2
 }

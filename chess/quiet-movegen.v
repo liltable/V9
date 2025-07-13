@@ -16,9 +16,7 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 		return list
 	}
 
-	// broken repetition table, can only use halfmove counter for draw detection rn
-
-	if b.draw_counter >= 100 {
+	if b.draw_counter >= 100 || b.repetitions.is_draw(b.position_hash) {
 		return list
 	}
 
