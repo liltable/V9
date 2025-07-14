@@ -152,9 +152,9 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	mut move_picker := MovePicker.new(&bot.board)
 	mut moves_searched := 0
 
-	if found_entry.move != null_move {
-		move_picker.set_entry_move(found_entry.move)
-	}
+	// if found_entry.move != null_move {
+	// 	move_picker.set_entry_move(found_entry.move)
+	// }
 
 	for {
 		move := move_picker.next_move()
@@ -190,7 +190,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		}
 	}
 
-	entry_flag := if best_score > old_alpha { EntryType.upperbound } else if best_score >= beta { .lowerbound } else { .exact }
+	entry_flag := if best_score >= beta { EntryType.lowerbound } else if best_score > old_alpha { .upperbound } else { .exact }
 	entry := TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag}
 
 	bot.tt.insert(entry)

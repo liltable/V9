@@ -8,6 +8,7 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
 - [x] Legal Move Generation
     - [x] Precalculated Leaper Attacks
     - [x] Simple Magic Bitboard Slider Attacks
+    - [x] Staged Move Generation
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
     - [ ] Move Ordering (MVV-LVA)
