@@ -67,9 +67,9 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 				bot.board.print()
 			}
 		}
-		// 'ttsize' {
-		// 	println('${bot.search.tt.size} entries')
-		// }
+		'ttsize' {
+			println('${bot.tt.size} entries')
+		}
 		'pv' {
 			println("mainline: ${bot.search.pv.mainline()}")
 			for l, line in bot.search.pv.line_lengths {

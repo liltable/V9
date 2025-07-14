@@ -4,7 +4,6 @@ import time { StopWatch }
 import chess { Move, Bitboard, Color, MoveList }
 
 const null_move = Move(0)
-const global_tt_size_mb = 128
 
 struct Search	
 {
