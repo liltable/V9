@@ -3,7 +3,6 @@
 import chess { Bitboard, Move }
 
 const global_tt_size_mb = 128
-const tt_entry_cap = 5592405
 
 pub enum EntryType {
 	invalid
@@ -25,8 +24,18 @@ pub const null_tt_entry = TranspositionEntry{}
 
 struct TranspositionTable {
 mut:
-	entries [tt_entry_cap]TranspositionEntry
-	size int = tt_entry_cap
+	entries []TranspositionEntry
+	size    int
+}
+
+pub fn TranspositionTable.new(size_mb int) TranspositionTable {
+	entry_size := sizeof(TranspositionEntry)
+	table_size_bytes := size_mb * 1024 * 1024
+	entry_count := table_size_bytes / int(entry_size)
+
+	table := []TranspositionEntry{len: entry_count}
+
+	return TranspositionTable{table, entry_count}
 }
 
 pub fn (mut table TranspositionTable) insert(entry TranspositionEntry) {
@@ -38,5 +47,5 @@ pub fn (table TranspositionTable) lookup(key Bitboard) TranspositionEntry {
 }
 
 pub fn (mut table TranspositionTable) clear() {
-	table.entries = [tt_entry_cap]TranspositionEntry{}
+	table.entries = []TranspositionEntry{len: table.size}
 }

@@ -10,7 +10,7 @@ pub mut:
 	info           EngineInfo
 	board          chess.Board
 	search 		   Search
-	tt 				TranspositionTable
+	tt 				TranspositionTable = TranspositionTable.new(global_tt_size_mb)
 	stdin          chan string
 	output         chan string
 }
