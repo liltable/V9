@@ -58,7 +58,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 
 			if move != null_move {
 				return move
-			} else if picker.move_list.count == 0 {
+			} else {
 				picker.next_stage()
 				move = picker.next_move()
 			}

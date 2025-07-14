@@ -34,6 +34,14 @@ pub fn (mut search Search) check_time() {
 	search.overtime = search.timer.elapsed().milliseconds() >= search.time_limit || stop == "stop"
 }
 
+pub fn (bot Engine) score() int {
+	if bot.board.draw_counter >= 100 || bot.board.repetitions.is_real_draw(bot.board.position_hash) {
+		return 0
+	} else {
+		return bot.board.score()
+	}
+}
+
 pub fn (mut bot Engine) start_search() {
 	bot.search.active = true
 	bot.search.nodes = 0
@@ -67,14 +75,6 @@ pub fn (bot Engine) get_zobrist_key() Bitboard {
 	}
 
 	return key
-}
-
-pub fn (bot Engine) score() int {
-	if bot.board.draw_counter >= 100 || bot.board.repetitions.is_theoretical_draw(bot.board.position_hash) { 
-		return 0
-	 } else { 
-		return bot.board.score()
-	 }
 }
 
 pub fn (mut bot Engine) iterate() {

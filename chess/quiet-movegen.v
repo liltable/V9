@@ -16,10 +16,6 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 		return list
 	}
 
-	if b.draw_counter >= 100 || b.repetitions.is_real_draw(b.position_hash) {
-		return list
-	}
-
 	match type {
 		.quiets {
 			b.pawn_quiets(mut &list)
