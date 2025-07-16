@@ -3,7 +3,6 @@ module engine
 import chess { Board, Move, MoveList }
 
 pub enum MovegenStage {
-	tt_move
 	// killer_move
 	gen_captures
 	captures
@@ -17,12 +16,11 @@ pub struct MovePicker {
 	move_list MoveList
 	stage MovegenStage
 	board &Board
-	entry_move Move
 }
 
 pub fn MovePicker.new(board &Board) MovePicker {
 	unsafe { 
-		return MovePicker{MoveList{}, MovegenStage(1), board, null_move}
+		return MovePicker{MoveList{}, .gen_captures, board}
 	}
 }
 
@@ -35,23 +33,11 @@ pub fn (mut picker MovePicker) next_stage() {
 	// this language needs better casting support
 }
 
-pub fn (mut picker MovePicker) set_entry_move(move Move) {
-	unsafe {
-		picker.stage = MovegenStage(0)
-	}
-	picker.entry_move = move
-}
-
-
 pub fn (mut picker MovePicker) next_move() Move {
 
 	mut move := null_move 
 
 	match picker.stage {
-		.tt_move {
-			picker.next_stage()
-			return picker.entry_move
-		}
 		// .killer_move {
 		// 	picker.next_stage()
 
@@ -67,7 +53,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 		}
 
 		.captures {
-			move = picker.move_list.next()
+			move = picker.move_list.next().move
 
 			if move != null_move {
 				return move
@@ -85,7 +71,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 		}
 
 		.quiets {
-			move = picker.move_list.next()
+			move = picker.move_list.next().move
 
 			if move != null_move {
 				return move
@@ -96,3 +82,4 @@ pub fn (mut picker MovePicker) next_move() Move {
 	return move
 }
 
+	

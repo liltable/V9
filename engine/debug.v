@@ -68,7 +68,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 			}
 		}
 		'ttsize' {
-			println('${bot.tt.size} entries')
+			println('${bot.tt.size} entries using ${global_tt_size_mb}mb')
 		}
 		'pv' {
 			println("mainline: ${bot.search.pv.mainline()}")
@@ -89,13 +89,12 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		'draw' {
 			println("${bot.board.draw_counter} ${if bot.board.draw_counter >= 100 { 'true' } else { 'false' }}")
 			println("${bot.board.position_hash}: ${bot.board.repetitions.is_real_draw(bot.board.position_hash)}")
-			println(bot.board.repetitions)
 		}
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
 		}
 		'move-picker' {
-			mut move_picker := MovePicker{MoveList{}, .gen_captures, &bot.board, null_move}
+			mut move_picker := MovePicker.new(&bot.board)
 
 			for {
 				move := move_picker.next_move()
