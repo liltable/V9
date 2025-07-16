@@ -284,8 +284,8 @@ pub fn (b Board) get_square_attackers(sq int, blockers Bitboard) Bitboard {
 	attackers |= king_attacks[sq] & b.bitboards[Bitboards.kings] & enemies
 	attackers |= pawn_attacks[us][sq] & b.bitboards[Bitboards.pawns] & enemies
 	attackers |= knight_attacks[sq] & b.bitboards[Bitboards.knights] & enemies
-	attackers |= bishop_attacks(sq, blockers) & diagonal_sliders
-	attackers |= rook_attacks(sq, blockers) & orthogonal_sliders
+	attackers |= fast_bishop_moves(sq, blockers) & diagonal_sliders
+	attackers |= fast_rook_moves(sq, blockers) & orthogonal_sliders
 
 	return attackers
 }
