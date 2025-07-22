@@ -118,6 +118,7 @@ pub fn (mut bot Engine) iterate() {
 
 pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	bot.search.pv.set_length(ply)
+	bot.search.nodes++	
 
 	// old_alpha := a
 	// zobrist_key := bot.get_zobrist_key()
@@ -130,8 +131,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	if depth > 2 && bot.search.overtime { return alpha }
-
-	bot.search.nodes++	
 
 	if depth <= 0 {
 		return bot.score()

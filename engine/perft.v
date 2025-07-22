@@ -16,7 +16,7 @@ fn (mut bot Engine) internal_perft(depth int) int {
 	mut nodes := 0
 
 	for move in moves {
-		bot.board.make_move(move)
+		bot.board.make_move(move.move)
 		nodes += bot.internal_perft(depth - 1)
 		bot.board.undo_move()
 	}
@@ -34,12 +34,12 @@ pub fn (mut bot Engine) perft(depth int) {
 	moves := bot.board.get_moves(.all).to_array()
 
 	for move in moves {
-		bot.board.make_move(move)
+		bot.board.make_move(move.move)
 		new_nodes := bot.internal_perft(depth - 1)
 		bot.board.undo_move()
 
 		total_nodes += new_nodes
-		bot.output <- ('${move.lan()}: ${new_nodes}')
+		bot.output <- ('${move.move.lan()}: ${new_nodes}')
 	}
 
 	timer.stop()

@@ -60,7 +60,7 @@ pub fn (mut b Board) get_move_list() map[string]Move {
 	moves := b.get_moves(.all)
 
 	for idx in 0 .. moves.count {
-		move := moves.get_move(idx)
+		move := moves.get_move(idx).move
 
 		if move != null_move {
 			list[move.lan()] = move
