@@ -122,10 +122,11 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	old_alpha := a
 	zobrist_key := bot.get_zobrist_key()
-	// in_check := bot.board.checkers > 1
+	in_check := bot.board.checkers > 1
 
 	mut alpha, mut beta := a, b
 	mut depth := d
+	// mut entry_move := null_move
 
 	if (bot.search.nodes & 2047) > 0 {
 		bot.search.check_time()
@@ -134,6 +135,8 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	found_entry := bot.tt.lookup(zobrist_key)
 
 	if found_entry.key == zobrist_key && found_entry.depth >= depth && ply > 0 {
+		// entry_move = found_entry.move
+
 		if found_entry.type == .exact ||
 		(found_entry.type == .upperbound && found_entry.score < alpha) ||
 		(found_entry.type == .lowerbound && found_entry.score >= beta) {
@@ -201,7 +204,10 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 }
 
 pub fn (mut bot Engine) quiesence(a int, b int) int {
-	bot.search.nodes++
+	
+	if bot.search.nodes & 2047 > 0 {
+		bot.search.check_time()
+	}
 
 	stand_pat := bot.board.score()
 
@@ -212,11 +218,11 @@ pub fn (mut bot Engine) quiesence(a int, b int) int {
 
 	if stand_pat > alpha { alpha = stand_pat }
 
-	mut moves := bot.board.get_moves(.captures)
+	mut moves := MovePicker.noisy(&bot.board)
 
 	for {
-		move := moves.next().move
-		if move == null_move { break }
+		move := moves.next_move()
+		if move == null_move || bot.search.overtime { break }
 
 		bot.board.make_move(move)
 		score := -bot.quiesence(-beta, -alpha)

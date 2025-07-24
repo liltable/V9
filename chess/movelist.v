@@ -69,6 +69,13 @@ pub fn (mut list MoveList) next() ScoredMove {
 	return null_scored_move 
 }
 
+/*
+	- data_to_array[T]() => 
+	a function that creates a mutable slice of a fixed-size array
+	as a dynamic array using the same memory as the orginal fixed-size array 
+	since V doesn't allow it by default
+	(so much for being safe)
+*/
 pub fn data_to_array[T](start voidptr, len int) []T {
 	mut section := unsafe {
 		array {

@@ -56,7 +56,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 		.gen_captures {
 			picker.move_list = picker.board.get_moves(.captures)
 
-			picker.score_moves()
+			// picker.score_moves()
 
 			picker.next_stage()
 			move = picker.next_move()
@@ -67,7 +67,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 
 			if move != null_move {
 				return move
-			} else {
+			} else if picker.mode == .normal {
 				picker.next_stage()
 				move = picker.next_move()
 			}
