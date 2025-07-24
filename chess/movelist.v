@@ -68,3 +68,23 @@ pub fn (mut list MoveList) next() ScoredMove {
 
 	return null_scored_move 
 }
+
+pub fn data_to_array[T](start voidptr, len int) []T {
+	mut section := unsafe {
+		array {
+			data: start
+			len: len
+			element_size: int(sizeof(T))
+			flags: .nofree | .nogrow | .noshrink
+		}
+	 }
+
+	 return section
+}
+
+pub fn (mut list MoveList) sort_moves() {
+	start := &list.moves[0]
+	mut section := data_to_array[ScoredMove](start, list.count)
+
+	section.sort(a.score > b.score) // descending
+}

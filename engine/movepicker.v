@@ -10,18 +10,26 @@ pub enum MovegenStage {
 	quiets
 }
 
+pub enum SearchMode {
+	normal
+	noisy
+}
+
 pub struct MovePicker {
 	// killer_move Move
 	mut:
 	move_list MoveList
 	stage MovegenStage
-	board &Board
+	mode SearchMode
+	board Board
 }
 
 pub fn MovePicker.new(board &Board) MovePicker {
-	unsafe { 
-		return MovePicker{MoveList{}, .gen_captures, board}
-	}
+	return MovePicker{MoveList{}, .gen_captures, .normal, board}
+}
+
+pub fn MovePicker.noisy(board &Board) MovePicker {
+	return MovePicker{MoveList{}, .gen_captures, .noisy, board}
 }
 
 pub fn (mut picker MovePicker) next_stage() {
@@ -47,6 +55,8 @@ pub fn (mut picker MovePicker) next_move() Move {
 		// }
 		.gen_captures {
 			picker.move_list = picker.board.get_moves(.captures)
+
+			picker.score_moves()
 
 			picker.next_stage()
 			move = picker.next_move()
@@ -82,4 +92,17 @@ pub fn (mut picker MovePicker) next_move() Move {
 	return move
 }
 
+pub fn (mut picker MovePicker) score_moves() {
+	for idx in 0 .. picker.move_list.count 
+	{
+		mut mv := &picker.move_list.moves[idx]
+		victim := picker.board.pieces[mv.move.to_square()].type()
+		aggressor := mv.move.piece().type()
+
+		//MVV-LVA
+		mv.set_score(10 * int(victim) - int(aggressor))
+	}
+
+	picker.move_list.sort_moves()
+}
 	
