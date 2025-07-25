@@ -330,28 +330,24 @@ pub fn (mut b Board) make_move(move Move) {
 	from := move.from_square()
 	to := move.to_square()
 	piece := move.piece()
-	promotion := move.promotion()
-	special := move.special()
-	castle := move.castle()
 	us := b.turn
 	opp := us.opp()
+	captured := move.captured()
+	promoted := move.promotion()
 
-	captured := b.pieces[to].type()
+	is_en_passant := move.is_en_passant()
+	is_pawn_double := move.is_pawn_double()
+	is_castle := move.is_castle()
+	is_capture := captured != .none
+	is_promotion := promoted != .none
 
 	b.states << StateHistory{captured, b.draw_counter, b.en_passant_file, b.castling_rights}
 
 	b.move_counter++
 	b.draw_counter++
 
-	match special {
-		.capture {
-			target := b.pieces[to]
-
-			assert target != null_piece && target == Piece.new(opp, captured)
-
-			b.remove_piece(to)
-		}
-		.en_passant {
+	if is_capture {
+		if is_en_passant {
 			target := square_bbs[to].forward(opp).lsb()
 			targeted := b.pieces[target]
 
@@ -362,66 +358,80 @@ pub fn (mut b Board) make_move(move Move) {
 			}
 
 			b.remove_piece(target)
-		}
-		.pawn_double {
-			assert to & 7 == from & 7
+			
+		} else {
+			target := b.pieces[to]
 
-			b.en_passant_file = all_files[to & 7]
+			assert target != null_piece
+			if target != Piece.new(opp, captured) {
+				b.print()
+				println(captured)
+				println(move.lan())
+				panic("huh")
+			}
+
+			b.remove_piece(to)
 		}
-		else {}
 	}
 
-	if special != .none || piece.type() == .pawn {
+
+	if is_capture || piece.type() == .pawn {
 		b.draw_counter = 0
 	}
 
-	if special != .pawn_double {
+	if is_pawn_double {
 		b.en_passant_file = empty_bb
 	}
 
-	if promotion != .none {
-		assert piece == Piece.new(us, .pawn)
+	if is_promotion {
+		if piece != Piece.new(us, .pawn) {
+			println(move.lan())
+			b.print()
+			panic('wtf')
+		}
 
 		b.remove_piece(from)
 
-		b.add_piece(Piece.new(us, promotion), from)
+		b.add_piece(Piece.new(us, promoted), from)
 	}
 
-	match castle {
-		.kingside {
-			assert b.pieces[kingside_rook_from[us]] == Piece.new(us, .rook)
+	if is_castle {
+		match to {
+			kingside_destination[us] {
+				assert b.pieces[kingside_rook_from[us]] == Piece.new(us, .rook)
 
-			b.move_piece(kingside_rook_from[us], kingside_rook_to[us])
-		}
-		.queenside {
-			assert b.pieces[queenside_rook_from[us]] == Piece.new(us, .rook)
-
-			b.move_piece(queenside_rook_from[us], queenside_rook_to[us])
-		}
-		else {
-			match piece.type() {
-				.king {
-					b.castling_rights &= ~our_castling_rights[us]
-				}
-				.rook {
-					kingside := our_kingside_right[us]
-					queenside := our_queenside_right[us]
-					match from {
-						kingside_rook_from[us] {
-							if (b.castling_rights & kingside) > 0 {
-								b.castling_rights &= ~kingside
-							}
-						}
-						queenside_rook_from[us] {
-							if (b.castling_rights & queenside) > 0 {
-								b.castling_rights &= ~queenside
-							}
-						}
-						else {}
-					}
-				}
-				else {}
+				b.move_piece(kingside_rook_from[us], kingside_rook_to[us])
 			}
+			queenside_destination[us] {
+				assert b.pieces[queenside_rook_from[us]] == Piece.new(us, .rook)
+
+				b.move_piece(queenside_rook_from[us], queenside_rook_to[us])
+			}
+			else {}
+		}
+	} else {
+		match piece.type() {
+			.king {
+				b.castling_rights &= ~our_castling_rights[us]
+			}
+			.rook {
+				kingside := our_kingside_right[us]
+				queenside := our_queenside_right[us]
+				match from {
+					kingside_rook_from[us] {
+						if (b.castling_rights & kingside) > 0 {
+							b.castling_rights &= ~kingside
+						}
+					}
+					queenside_rook_from[us] {
+						if (b.castling_rights & queenside) > 0 {
+							b.castling_rights &= ~queenside
+						}
+					}
+					else {}
+				}
+			}
+			else {}
 		}
 	}
 
@@ -441,22 +451,27 @@ pub fn (mut b Board) undo_move() {
 
 	from := move.from_square()
 	to := move.to_square()
-	captured := old_state.captured
 	piece := move.piece()
-	special := move.special()
-	castle := move.castle()
-	promotion := move.promotion()
 	us := piece.color()
 	opp := us.opp()
 
+	captured := move.captured()
+	promoted := move.promotion()
+
+	is_en_passant := move.is_en_passant()
+	is_castle := move.is_castle()
+	is_capture := captured != .none
+	is_promotion := promoted != .none
+
 	assert b.turn == opp
+	assert old_state.captured == captured
 
 	b.move_counter--
 	b.draw_counter = old_state.halfmoves
 	b.castling_rights = old_state.castling_rights
 	b.en_passant_file = old_state.en_passant_file
 
-	if b.pieces[to] == null_piece && special != .en_passant {
+	if b.pieces[to] == null_piece && !is_en_passant {
 		// Mailbox Bitboard mismatch, always assert that the mailbox is wrong and correct it using the bitboards
 		b.pieces[to] = piece
 	}
@@ -465,28 +480,30 @@ pub fn (mut b Board) undo_move() {
 
 	b.move_piece(to, from)
 
-	if captured != .none {
+	if is_capture {
 		b.add_piece(Piece.new(opp, captured), to)
 	}
 
-	if special == .en_passant {
+	if is_en_passant {
 		assert (square_bbs[to] & b.en_passant_file) > 0
 		b.add_piece(Piece.new(opp, .pawn), if us == .white { to - 8 } else { to + 8 })
 	}
 
-	match castle {
-		.kingside {
-			assert b.pieces[kingside_rook_to[us]] == Piece.new(us, .rook)
-			b.move_piece(kingside_rook_to[us], kingside_rook_from[us])
+	if is_castle {
+		match to {
+			kingside_destination[us] {
+				assert b.pieces[kingside_rook_to[us]] == Piece.new(us, .rook)
+				b.move_piece(kingside_rook_to[us], kingside_rook_from[us])
+			}
+			queenside_destination[us] {
+				assert b.pieces[queenside_rook_to[us]] == Piece.new(us, .rook)
+				b.move_piece(queenside_rook_to[us], queenside_rook_from[us])
+			}
+			else {}
 		}
-		.queenside {
-			assert b.pieces[queenside_rook_to[us]] == Piece.new(us, .rook)
-			b.move_piece(queenside_rook_to[us], queenside_rook_from[us])
-		}
-		else {}
 	}
 
-	if promotion != .none {
+	if is_promotion {
 		b.remove_piece(from)
 
 		b.add_piece(Piece.new(us, .pawn), from)

@@ -122,7 +122,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	old_alpha := a
 	zobrist_key := bot.get_zobrist_key()
-	in_check := bot.board.checkers > 1
+	// in_check := bot.board.checkers > 1
 
 	mut alpha, mut beta := a, b
 	mut depth := d

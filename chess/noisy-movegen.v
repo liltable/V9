@@ -36,7 +36,9 @@ pub fn (board Board) pawn_captures(mut list MoveList) {
 		}
 
 		for targets > 0 {
-			list.add_move(Move.encode(piece, pawn, targets.pop_lsb(), .none, .none, .capture))
+			target := targets.pop_lsb()
+			target_type := board.pieces[target].type()
+			list.add_move(Move.capture(piece, target_type, pawn, target))
 		}
 
 		for capture_ep > 0 {
@@ -44,7 +46,7 @@ pub fn (board Board) pawn_captures(mut list MoveList) {
 			target := square_bbs[destination].forward(opp).lsb()
 
 			if board.pieces[target] == Piece.new(opp, .pawn) {
-				list.add_move(Move.encode(piece, pawn, destination, .none, .none, .en_passant))
+				list.add_move(Move.en_passant(piece, pawn, destination))
 			}
 		}
 	}
@@ -65,12 +67,13 @@ pub fn (board Board) pawn_captures(mut list MoveList) {
 		}
 
 		for targets > 0 {
-			list.add_move(Move.encode(piece, pawn, targets.lsb(), .knight, .none, .capture))
-			list.add_move(Move.encode(piece, pawn, targets.lsb(), .bishop, .none, .capture))
-			list.add_move(Move.encode(piece, pawn, targets.lsb(), .rook, .none, .capture))
-			list.add_move(Move.encode(piece, pawn, targets.lsb(), .queen, .none, .capture))
+			target := targets.pop_lsb()
+			target_type := board.pieces[target].type()
 
-			targets.pop_lsb()
+			list.add_move(Move.capture_promotion(piece, target_type, .knight, pawn, target))
+			list.add_move(Move.capture_promotion(piece, target_type, .bishop, pawn, target))
+			list.add_move(Move.capture_promotion(piece, target_type, .rook, pawn, target))
+			list.add_move(Move.capture_promotion(piece, target_type, .queen, pawn, target))
 		}
 	}
 } 
@@ -96,7 +99,10 @@ pub fn (board Board) knight_captures(mut list MoveList) {
 		}
 
 		for captures > 0 {
-			list.add_move(Move.encode(piece, knight, captures.pop_lsb(), .none, .none, .capture))
+			target := captures.pop_lsb()
+			target_type := board.pieces[target].type()
+
+			list.add_move(Move.capture(piece, target_type, knight, target))
 		}
 	}
 }
@@ -126,7 +132,9 @@ pub fn (board Board) bishop_captures(mut list MoveList) {
 		}
 
 		for captures > 0 {
-			list.add_move(Move.encode(piece, bishop, captures.pop_lsb(), .none, .none, .capture))
+			target := captures.pop_lsb()
+			target_type := board.pieces[target].type()
+			list.add_move(Move.capture(piece, target_type, bishop, target))
 		}
 	}
 }
@@ -156,7 +164,10 @@ pub fn (board Board) rook_captures(mut list MoveList) {
 		}
 
 		for captures > 0 {
-			list.add_move(Move.encode(piece, rook, captures.pop_lsb(), .none, .none, .capture))
+			target := captures.pop_lsb()
+			target_type := board.pieces[target].type()
+
+			list.add_move(Move.capture(piece, target_type, rook, target))
 		}
 	}
 }
@@ -186,7 +197,10 @@ pub fn (board Board) queen_captures(mut list MoveList) {
 		}
 
 		for captures > 0 {
-			list.add_move(Move.encode(piece, queen, captures.pop_lsb(), .none, .none, .capture))
+			target := captures.pop_lsb()
+			target_type := board.pieces[target].type()
+
+			list.add_move(Move.capture(piece, target_type, queen, target))
 		}
 	}
 }

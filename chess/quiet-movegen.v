@@ -103,8 +103,7 @@ pub fn (b Board) pawn_quiets(mut list MoveList) {
 			}
 
 			for destination > 0 {
-				list.add_move(Move.encode(piece, pawn, destination.pop_lsb(), .none, .none,
-					.none))
+				list.add_move(Move.quiet(piece, pawn, destination.pop_lsb()))
 			}
 		}
 
@@ -125,7 +124,7 @@ pub fn (b Board) pawn_quiets(mut list MoveList) {
 			}
 
 			if destination > 0 {
-				list.add_move(Move.encode(piece, pawn, destination.lsb(), .none, .none, .pawn_double))
+				list.add_move(Move.pawn_double(piece, pawn, destination.pop_lsb()))
 			}
 		}
 
@@ -145,10 +144,12 @@ pub fn (b Board) pawn_quiets(mut list MoveList) {
 			}
 
 			if destination > 0 {
-				list.add_move(Move.encode(piece, pawn, destination.lsb(), .knight, .none, .none))
-				list.add_move(Move.encode(piece, pawn, destination.lsb(), .bishop, .none, .none))
-				list.add_move(Move.encode(piece, pawn, destination.lsb(), .rook, .none, .none))
-				list.add_move(Move.encode(piece, pawn, destination.lsb(), .queen, .none, .none))
+				target := destination.pop_lsb()
+
+				list.add_move(Move.promotion(piece, .knight, pawn, target))
+				list.add_move(Move.promotion(piece, .bishop, pawn, target))
+				list.add_move(Move.promotion(piece, .rook, pawn, target))
+				list.add_move(Move.promotion(piece, .queen, pawn, target))
 			}
 		}
 }
@@ -174,7 +175,7 @@ pub fn (b Board) knight_quiets(mut list MoveList) {
 		}
 
 		for quiets > 0 {
-			list.add_move(Move.encode(piece, knight, quiets.pop_lsb(), .none, .none, .none))
+			list.add_move(Move.quiet(piece, knight, quiets.pop_lsb()))
 		}
 	}
 }
@@ -204,7 +205,7 @@ pub fn (b Board) bishop_quiets(mut list MoveList) {
 		}
 
 		for quiets > 0 {
-			list.add_move(Move.encode(piece, bishop, quiets.pop_lsb(), .none, .none, .none))
+			list.add_move(Move.quiet(piece, bishop, quiets.pop_lsb()))
 		}
 
 	}
@@ -235,7 +236,7 @@ pub fn (b Board) rook_quiets(mut list MoveList) {
 		}
 
 		for quiets > 0 {
-			list.add_move(Move.encode(piece, rook, quiets.pop_lsb(), .none, .none, .none))
+			list.add_move(Move.quiet(piece, rook, quiets.pop_lsb()))
 		}
 	}
 }
@@ -265,7 +266,7 @@ pub fn (b Board) queen_quiets(mut list MoveList) {
 		}
 
 		for quiets > 0 {
-			list.add_move(Move.encode(piece, queen, quiets.pop_lsb(), .none, .none, .none))
+			list.add_move(Move.quiet(piece, queen, quiets.pop_lsb()))
 		}
 	}
 }
@@ -289,15 +290,16 @@ pub fn (b Board) king_moves(mut list MoveList) {
 		destination := evasions.pop_lsb()
 
 		if b.get_square_attackers(destination, occupied) == empty_bb {
-			list.add_move(Move.encode(king, k, destination, .none, .none, .none))
+			list.add_move(Move.quiet(king, k, destination))
 		}
 	}
 
 	for captures > 0 {
 		target := captures.pop_lsb()
+		target_type := b.pieces[target].type()
 
 		if b.get_square_attackers(target, occupied) == empty_bb {
-			list.add_move(Move.encode(king, k, target, .none, .none, .capture))
+			list.add_move(Move.capture(king, target_type, k, target))
 		}
 	}
 
@@ -330,14 +332,12 @@ pub fn (b Board) king_moves(mut list MoveList) {
 				match rook {
 					kingside_rook_from[us] {
 						if (b.castling_rights & our_kingside_right[us]) > 0 {
-							list.add_move(Move.encode(king, k, kingside_destination[us], .none,
-								.kingside, .none))
+							list.add_move(Move.castle(king, k, kingside_destination[us]))
 						}
 					}
 					queenside_rook_from[us] {
 						if (b.castling_rights & our_queenside_right[us]) > 0 {
-							list.add_move(Move.encode(king, k, queenside_destination[us], .none,
-								.queenside, .none))
+							list.add_move(Move.castle(king, k, queenside_destination[us]))
 						}
 					}
 					else {}
