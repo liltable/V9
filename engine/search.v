@@ -120,28 +120,11 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	bot.search.pv.set_length(ply)
 	bot.search.nodes++	
 
-	old_alpha := a
-	zobrist_key := bot.get_zobrist_key()
-	// in_check := bot.board.checkers > 1
-
 	mut alpha, mut beta := a, b
 	mut depth := d
-	// mut entry_move := null_move
 
 	if (bot.search.nodes & 2047) > 0 {
 		bot.search.check_time()
-	}
-
-	found_entry := bot.tt.lookup(zobrist_key)
-
-	if found_entry.key == zobrist_key && found_entry.depth >= depth && ply > 0 {
-		// entry_move = found_entry.move
-
-		if found_entry.type == .exact ||
-		(found_entry.type == .upperbound && found_entry.score < alpha) ||
-		(found_entry.type == .lowerbound && found_entry.score >= beta) {
-			return found_entry.score
-		}
 	}
 
 	// if depth > 2 && bot.search.overtime { return alpha }
@@ -154,7 +137,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	mut best_score := -9999999
 	mut best_move := null_move
-	mut move_picker := MovePicker.new(&bot.board)
+	mut move_picker := bot.board.get_moves(.all)
 	mut moves_searched := 0
 
 	// if found_entry.move != null_move {
@@ -162,7 +145,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	// }
 
 	for {
-		move := move_picker.next_move()
+		move := move_picker.next().move
 		if move == null_move || bot.search.overtime { break }
 
 		bot.board.make_move(move)
@@ -192,47 +175,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 			return ply + best_score 
 		} else {
 			return 0 
-		}
-	}
-
-	entry_flag := if best_score >= beta { EntryType.lowerbound } else if best_score <= old_alpha { .upperbound } else { .exact }
-	entry := TranspositionEntry{zobrist_key, best_score, depth, best_move, entry_flag}
-
-	bot.tt.insert(entry)
-
-	return best_score
-}
-
-pub fn (mut bot Engine) quiesence(a int, b int) int {
-	
-	if bot.search.nodes & 2047 > 0 {
-		bot.search.check_time()
-	}
-
-	stand_pat := bot.board.score()
-
-	mut best_score := stand_pat
-	mut alpha, mut beta := a, b
-
-	if stand_pat >= beta { return beta }
-
-	if stand_pat > alpha { alpha = stand_pat }
-
-	mut moves := MovePicker.noisy(&bot.board)
-
-	for {
-		move := moves.next_move()
-		if move == null_move || bot.search.overtime { break }
-
-		bot.board.make_move(move)
-		score := -bot.quiesence(-beta, -alpha)
-		bot.board.undo_move()
-
-		if score > best_score {
-			best_score = score
-
-			if score > alpha { alpha = score }
-			if alpha >= beta { break }
 		}
 	}
 

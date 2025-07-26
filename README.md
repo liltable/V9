@@ -11,14 +11,13 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
     - [x] Staged Move Generation
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
-    - [x] Transposition Tables (+200 elo)
-    - [x] Move Ordering
-        - [x] Captures First
-        - [ ] MVV-LVA (+20 elo)
-        - [ ] TT Entry Move First
+    - [ ] Move Ordering
+        - [ ] Captures-First
+        - [ ] MVV-LVA
         - [ ] Killer Moves
-    - [ ] Quiesence Search (+200 elo)
-    - [ ] Butterfly History Tables
+        - [ ] Butterfly History
+    - [ ] Quiesence Search
+    - [ ] Transposition Tables
     - [ ] Principal Variation Search
     - [ ] Aspiration Windows
 
