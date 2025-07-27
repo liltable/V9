@@ -37,3 +37,5 @@ pub fn (board Board) score() int {
 
   return (mg_score * mg_phase + eg_score * eg_phase) / 24
 }
+
+

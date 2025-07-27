@@ -140,7 +140,10 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		mut mv := &move_list.moves[idx]
 
 		if mv.move.captured() != .none {
-			mv.set_score(100)
+			// mv.set_score(100) // captures first
+			victim := mv.move.captured()
+			aggressor := mv.move.piece().type()
+			mv.set_score(10 * int(victim) - int(aggressor))
 		}
 	}
 
