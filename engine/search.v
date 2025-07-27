@@ -139,12 +139,19 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	for idx in 0 .. move_list.count {
 		mut mv := &move_list.moves[idx]
 
-		if mv.move.captured() != .none {
-			// mv.set_score(100) // captures first
-			victim := mv.move.captured()
+		mut score := 0
+
+		victim := mv.move.captured()
+
+		if victim != .none {
 			aggressor := mv.move.piece().type()
-			mv.set_score(10 * int(victim) - int(aggressor))
+			score += 10_000 * int(victim) - int(aggressor)
+		} else {
+			if mv.move == bot.killers[0][ply] { score += 90_000 }
+			if mv.move == bot.killers[1][ply] { score += 85_000 }
 		}
+
+		mv.set_score(score)
 	}
 
 	move_list.sort_moves()
@@ -152,6 +159,8 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	for {
 		move := move_list.next().move
 		if move == null_move || bot.search.overtime { break }
+
+		is_capture := move.captured() != .none
 
 		bot.board.make_move(move)
 		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
@@ -165,7 +174,15 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 			if score > alpha {
 				alpha = score
 
-				if alpha >= beta { break }
+				if alpha >= beta {
+
+					if !is_capture && move != bot.killers[0][ply] && move != bot.killers[1][ply] {
+						bot.killers[0][ply] = bot.killers[1][ply]
+						bot.killers[1][ply] = move
+					}
+
+					break
+				}
 
 				best_move = move
 

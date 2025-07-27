@@ -56,7 +56,7 @@ pub fn (mut picker MovePicker) next_move() Move {
 		.gen_captures {
 			picker.move_list = picker.board.get_moves(.captures)
 
-			// picker.score_moves()
+			picker.score_moves()
 
 			picker.next_stage()
 			move = picker.next_move()
@@ -96,7 +96,7 @@ pub fn (mut picker MovePicker) score_moves() {
 	for idx in 0 .. picker.move_list.count 
 	{
 		mut mv := &picker.move_list.moves[idx]
-		victim := picker.board.pieces[mv.move.to_square()].type()
+		victim := mv.move.captured()
 		aggressor := mv.move.piece().type()
 
 		//MVV-LVA

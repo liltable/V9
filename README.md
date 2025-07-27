@@ -13,7 +13,7 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
     - [x] Iterative Deepening
     - [ ] Move Ordering
         - [x] MVV-LVA (+275 elo)
-        - [ ] Killer Moves
+        - [x] Killer Moves (+15 elo)
         - [ ] Butterfly History
     - [ ] Quiesence Search
     - [ ] Transposition Tables
