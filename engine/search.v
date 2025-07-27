@@ -127,10 +127,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		bot.search.check_time()
 	}
 
-	// if depth > 2 && bot.search.overtime { return alpha }
-
-	// if depth < 2 && !in_check { return bot.quiesence(alpha, beta) }
-
 	if depth <= 0 {
 		return bot.score()
 	}
@@ -139,10 +135,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	mut best_move := null_move
 	mut move_picker := bot.board.get_moves(.all)
 	mut moves_searched := 0
-
-	// if found_entry.move != null_move {
-	// 	move_picker.set_entry_move(found_entry.move)
-	// }
 
 	for {
 		move := move_picker.next().move

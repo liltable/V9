@@ -204,3 +204,41 @@ pub fn (board Board) queen_captures(mut list MoveList) {
 		}
 	}
 }
+
+pub fn (b Board) pawn_promotions(mut list MoveList) {
+	us := b.turn
+	occupied := b.occupancies[Occupancies.both]
+	empty := ~occupied
+	our_pawns := b.bitboards[Bitboards.pawns] & b.occupancies[us]
+	promotion_rank := if us == .white { rank_7 } else { rank_2 }
+	pinned := b.pinned[us]
+
+	in_check := b.checkers > 0
+
+	mut single_push_p := our_pawns & promotion_rank
+
+	for single_push_p > 0 {
+		pawn := single_push_p.pop_lsb()
+		piece := b.pieces[pawn]
+		is_pinned := (pinned & square_bbs[pawn]) > 0
+
+		mut destination := square_bbs[pawn].forward(us) & empty & b.pinray[pawn]
+
+		if in_check {
+			destination &= b.checkray
+		}
+
+		if is_pinned {
+			destination &= b.pinray[pawn]
+		}
+
+		if destination > 0 {
+			target := destination.pop_lsb()
+
+			list.add_move(Move.promotion(piece, .knight, pawn, target))
+			list.add_move(Move.promotion(piece, .bishop, pawn, target))
+			list.add_move(Move.promotion(piece, .rook, pawn, target))
+			list.add_move(Move.promotion(piece, .queen, pawn, target))
+		}
+	}
+}

@@ -26,6 +26,7 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 		}
 		.captures {
 			b.pawn_captures(mut &list)
+			b.pawn_promotions(mut &list)
 			b.knight_captures(mut &list)
 			b.bishop_captures(mut &list)
 			b.rook_captures(mut &list)
@@ -33,6 +34,7 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 		}
 		.all {
 			b.pawn_quiets(mut &list)
+			b.pawn_promotions(mut &list)
 			b.pawn_captures(mut &list)
 
 			b.knight_quiets(mut &list)
@@ -83,75 +85,48 @@ pub fn (b Board) pawn_quiets(mut list MoveList) {
 
 	mut single_push_np := our_pawns & ~promotion_rank
 	mut double_push := our_pawns
-	mut single_push_p := our_pawns & promotion_rank
 
+	for single_push_np > 0 {
+		pawn := single_push_np.pop_lsb()
+		piece := b.pieces[pawn]
+		p := square_bbs[pawn]
+		is_pinned := (square_bbs[pawn] & pinned) > 0
 
-		for single_push_np > 0 {
-			pawn := single_push_np.pop_lsb()
-			piece := b.pieces[pawn]
-			p := square_bbs[pawn]
-			is_pinned := (square_bbs[pawn] & pinned) > 0
+		mut destination := p.forward(us) & empty
 
-			mut destination := p.forward(us) & empty
-
-			if in_check {
-				destination &= b.checkray
-			}
-
-			if is_pinned {
-				destination &= b.pinray[pawn]
-			}
-
-			for destination > 0 {
-				list.add_move(Move.quiet(piece, pawn, destination.pop_lsb()))
-			}
+		if in_check {
+			destination &= b.checkray
 		}
 
-		for double_push > 0 {
-			pawn := double_push.pop_lsb()
-			piece := b.pieces[pawn]
-			p := square_bbs[pawn]
-			is_pinned := (pinned & square_bbs[pawn]) > 0
-
-			mut destination := (p.forward(us) & double_push_rank & empty).forward(us) & empty
-
-			if in_check {
-				destination &= b.checkray
-			}
-
-			if is_pinned {
-				destination &= b.pinray[pawn]
-			}
-
-			if destination > 0 {
-				list.add_move(Move.pawn_double(piece, pawn, destination.pop_lsb()))
-			}
+		if is_pinned {
+			destination &= b.pinray[pawn]
 		}
 
-		for single_push_p > 0 {
-			pawn := single_push_p.pop_lsb()
-			piece := b.pieces[pawn]
-			is_pinned := (b.pinned[us] & square_bbs[pawn]) > 0
-
-			mut destination := square_bbs[pawn].forward(us) & empty & b.pinray[pawn]
-
-			if in_check {
-				destination &= b.checkray
-			}
-
-			if is_pinned {
-				destination &= b.pinray[pawn]
-			}
-
-			if destination > 0 {
-				target := destination.pop_lsb()
-
-				list.add_move(Move.promotion(piece, .knight, pawn, target))
-				list.add_move(Move.promotion(piece, .bishop, pawn, target))
-				list.add_move(Move.promotion(piece, .rook, pawn, target))
-				list.add_move(Move.promotion(piece, .queen, pawn, target))
-			}
+		for destination > 0 {
+			list.add_move(Move.quiet(piece, pawn, destination.pop_lsb()))
 		}
+	}
+
+	for double_push > 0 {
+		pawn := double_push.pop_lsb()
+		piece := b.pieces[pawn]
+		p := square_bbs[pawn]
+		is_pinned := (pinned & square_bbs[pawn]) > 0
+
+		mut destination := (p.forward(us) & double_push_rank & empty).forward(us) & empty
+
+		if in_check {
+			destination &= b.checkray
+		}
+
+		if is_pinned {
+			destination &= b.pinray[pawn]
+		}
+
+		if destination > 0 {
+			list.add_move(Move.pawn_double(piece, pawn, destination.pop_lsb()))
+		}
+	}
 }
 
 pub fn (b Board) knight_quiets(mut list MoveList) {
