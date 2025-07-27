@@ -88,6 +88,13 @@ pub fn (m Move) is_castle() bool {
 	return m & move_castling_mask > 0
 }
 
+pub fn (m Move) is_capture() bool {
+	return m & move_captured_mask > 0
+}
+
+pub fn (m Move) is_promotion() bool {
+	return m & move_promo_mask > 0
+}
 
 pub fn (m Move) is_en_passant() bool {
 	return m & move_passant_mask > 0

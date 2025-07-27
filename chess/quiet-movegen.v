@@ -59,10 +59,10 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 pub fn (mut b Board) get_move_list() map[string]Move {
 	mut list := map[string]Move{}
 
-	moves := b.get_moves(.all)
+	move_list := b.get_moves(.all)
 
-	for idx in 0 .. moves.count {
-		move := moves.get_move(idx).move
+	for idx in 0 .. move_list.count {
+		move := move_list.moves[idx]
 
 		if move != null_move {
 			list[move.lan()] = move

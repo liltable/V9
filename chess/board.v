@@ -338,8 +338,8 @@ pub fn (mut b Board) make_move(move Move) {
 	is_en_passant := move.is_en_passant()
 	is_pawn_double := move.is_pawn_double()
 	is_castle := move.is_castle()
-	is_capture := captured != .none
-	is_promotion := promoted != .none
+	is_capture := move.is_capture()
+	is_promotion := move.is_promotion()
 
 	b.states << StateHistory{captured, b.draw_counter, b.en_passant_file, b.castling_rights}
 

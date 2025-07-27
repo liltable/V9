@@ -93,17 +93,6 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
 		}
-		'move-picker' {
-			mut move_picker := MovePicker.noisy(&bot.board)
-
-			for {
-				move := move_picker.next_move()
-
-				if move == null_move { break }
-
-				println(move.lan())
-			}
-		}
 		else {}
 	}
 }

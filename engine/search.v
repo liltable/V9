@@ -133,33 +133,13 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	mut best_score := -9999999
 	mut best_move := null_move
-	mut move_list := bot.board.get_moves(.all)
 	mut moves_searched := 0
 
-	for idx in 0 .. move_list.count {
-		mut mv := &move_list.moves[idx]
+	mut move_list := bot.board.get_moves(.all)
+	mut scored_moves := ScoredMoveList.new(move_list, &bot, ply)
 
-		mut score := 0
-
-		victim := mv.move.captured()
-
-		if victim != .none {
-			aggressor := mv.move.piece().type()
-			score += 100_000 * int(victim) - int(aggressor)
-		} else {
-			if mv.move == bot.killers[0][ply] { score += 90_000 }
-			if mv.move == bot.killers[1][ply] { score += 80_000 }
-		}
-
-		score += bot.history[bot.board.turn][mv.move.from_square()][mv.move.to_square()]
-
-		mv.set_score(score)
-	}
-
-	move_list.sort_moves()
-
-	for {
-		move := move_list.next().move
+	for {	
+		move := scored_moves.next_move()
 		if move == null_move || bot.search.overtime { break }
 
 		is_capture := move.captured() != .none

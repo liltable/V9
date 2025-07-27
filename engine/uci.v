@@ -82,5 +82,5 @@ pub fn (mut bot Engine) handle_quit() {
 pub fn (mut bot Engine) random_move() chess.Move {
 	moves := bot.board.get_moves(.all).to_array()
 	move := element(moves) or { moves[0] }
-	return move.move
+	return move
 }
