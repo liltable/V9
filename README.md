@@ -14,7 +14,7 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
     - [ ] Move Ordering
         - [x] MVV-LVA (+275 elo)
         - [x] Killer Moves (+15 elo)
-        - [ ] Butterfly History
+        - [ ] Simple History Heuristic
     - [ ] Quiesence Search
     - [ ] Transposition Tables
     - [ ] Principal Variation Search

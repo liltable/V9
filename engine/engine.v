@@ -11,7 +11,8 @@ pub mut:
 	board          chess.Board
 	search 		   Search
 	tt 			   TranspositionTable = TranspositionTable.new(global_tt_size_mb)
-	killers        [3][max_depth]chess.Move
+	killers        [2][max_depth]chess.Move
+	history 	   [3][64][64]i16
 	stdin          chan string
 	output         chan string
 }

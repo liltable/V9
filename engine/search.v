@@ -145,11 +145,13 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 		if victim != .none {
 			aggressor := mv.move.piece().type()
-			score += 10_000 * int(victim) - int(aggressor)
+			score += 100_000 * int(victim) - int(aggressor)
 		} else {
 			if mv.move == bot.killers[0][ply] { score += 90_000 }
-			if mv.move == bot.killers[1][ply] { score += 85_000 }
+			if mv.move == bot.killers[1][ply] { score += 80_000 }
 		}
+
+		score += bot.history[bot.board.turn][mv.move.from_square()][mv.move.to_square()]
 
 		mv.set_score(score)
 	}
@@ -176,9 +178,14 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 				if alpha >= beta {
 
-					if !is_capture && move != bot.killers[0][ply] && move != bot.killers[1][ply] {
-						bot.killers[0][ply] = bot.killers[1][ply]
-						bot.killers[1][ply] = move
+					if !is_capture {
+
+						if move != bot.killers[0][ply] && move != bot.killers[1][ply] {
+							bot.killers[0][ply] = bot.killers[1][ply]
+							bot.killers[1][ply] = move
+						}
+
+						bot.history[bot.board.turn][move.from_square()][move.to_square()] += i16(depth * depth)
 					}
 
 					break
