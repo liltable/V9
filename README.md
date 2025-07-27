@@ -11,10 +11,10 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
     - [x] Staged Move Generation
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
-    - [ ] Move Ordering
+    - [x] Move Ordering
         - [x] MVV-LVA (+275 elo)
         - [x] Killer Moves (+15 elo)
-        - [ ] Simple History Heuristic
+        - [x] Simple History Heuristic (+20 elo)
     - [ ] Quiesence Search
     - [ ] Transposition Tables
     - [ ] Principal Variation Search
