@@ -133,11 +133,21 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 	mut best_score := -9999999
 	mut best_move := null_move
-	mut move_picker := bot.board.get_moves(.all)
+	mut move_list := bot.board.get_moves(.all)
 	mut moves_searched := 0
 
+	for idx in 0 .. move_list.count {
+		mut mv := &move_list.moves[idx]
+
+		if mv.move.captured() != .none {
+			mv.set_score(100)
+		}
+	}
+
+	move_list.sort_moves()
+
 	for {
-		move := move_picker.next().move
+		move := move_list.next().move
 		if move == null_move || bot.search.overtime { break }
 
 		bot.board.make_move(move)

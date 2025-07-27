@@ -12,7 +12,7 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
     - [ ] Move Ordering
-        - [ ] Captures-First
+        - [x] Captures-First (+220 elo)
         - [ ] MVV-LVA
         - [ ] Killer Moves
         - [ ] Butterfly History
