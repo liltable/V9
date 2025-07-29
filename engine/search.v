@@ -141,9 +141,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	for {	
 		move := scored_moves.next_move()
 		if move == null_move || bot.search.overtime { break }
-
-		is_capture := move.captured() != .none
-
+		
 		bot.board.make_move(move)
 		score := -bot.negamax(depth - 1, ply + 1, -beta, -alpha)
 		bot.board.undo_move()
@@ -158,7 +156,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 
 				if alpha >= beta {
 
-					if !is_capture {
+					if !move.is_capture() {
 
 						if move != bot.killers[0][ply] && move != bot.killers[1][ply] {
 							bot.killers[0][ply] = bot.killers[1][ply]

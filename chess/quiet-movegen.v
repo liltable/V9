@@ -23,6 +23,8 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 			b.bishop_quiets(mut &list)
 			b.rook_quiets(mut &list)
 			b.queen_quiets(mut &list)
+			
+			b.king_moves(mut &list)
 		}
 		.captures {
 			b.pawn_captures(mut &list)
@@ -48,10 +50,10 @@ pub fn (mut b Board) get_moves(type MovegenType) MoveList {
 
 			b.queen_quiets(mut &list)
 			b.queen_captures(mut &list)
+
+			b.king_moves(mut &list)
 		}
 	}
-
-	b.king_moves(mut &list)
 
 	return list
 }

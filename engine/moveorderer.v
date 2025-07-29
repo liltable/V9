@@ -45,7 +45,9 @@ pub fn (mut list ScoredMoveList) next_move() chess.Move {
 		}
 	}
 
-	list[idx] = null_scored_move
+	if list.len > 0 {
+		list[idx] = null_scored_move
+	}
 
 	return best_move.move
 }

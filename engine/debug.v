@@ -52,6 +52,15 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		'info' {
 			println('FEN: ${bot.board.get_fen()}')
 			println('Hash: ${bot.board.position_hash}')
+			println("Entry: ${bot.tt.lookup(bot.get_zobrist_key())}")
+		}
+		'decode-move' {
+			move := args[1]
+
+			if move.is_int() {
+				decoded := unsafe { chess.Move(u32(move.int())) }
+				println(decoded.lan())
+			}
 		}
 		'undo' {
 			bot.board.undo_move()

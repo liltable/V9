@@ -8,14 +8,13 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
 - [x] Legal Move Generation
     - [x] Precalculated Leaper Attacks
     - [x] Simple Magic Bitboard Slider Attacks
-    - [x] Staged Move Generation
 - [x] Negamax w/ Alpha-Beta Pruning
     - [x] Iterative Deepening
     - [x] Move Ordering
         - [x] MVV-LVA (+275 elo)
         - [x] Killer Moves (+15 elo)
         - [x] Simple History Heuristic (+20 elo)
-    - [ ] Quiesence Search
+    - [ ] ~~Quiesence Search~~ (this refuses to gain for some reason, revisit this later)
     - [ ] Transposition Tables
     - [ ] Principal Variation Search
     - [ ] Aspiration Windows
@@ -35,3 +34,4 @@ how do i default dance using markdown
 - [stockfish discord](https://discord.gg/GWDRS3kU6R)
 - bbc chess engine series by [maksim korzh](https://github.com/maksimkorzh/bbc)
 - chess coding adventure series by [sebastian lague](https://github.com/seblague/chess-coding-adventure)
+reason
