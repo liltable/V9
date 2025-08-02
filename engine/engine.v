@@ -54,6 +54,10 @@ pub fn (mut bot Engine) uci_listen() {
 				bot.board = chess.Board{}
 				bot.board.load_fen(chess.starting_fen)
 				bot.search = Search{}
+
+				bot.tt.clear()
+				bot.killers = [2][max_depth]chess.Move{}
+				bot.history = [3][64][64]i16{}
 			}
 			'position' {
 				bot.handle_pos(mut args)
