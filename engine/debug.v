@@ -95,10 +95,6 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 				}
 			}
 		}
-		'draw' {
-			println("${bot.board.draw_counter} ${if bot.board.draw_counter >= 100 { 'true' } else { 'false' }}")
-			println("${bot.board.position_hash}: ${bot.board.repetitions.is_real_draw(bot.board.position_hash)}")
-		}
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
 		}
