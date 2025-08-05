@@ -1,6 +1,7 @@
 module chess
 
 import math
+import arrays
 
 pub struct MaterialCounter {
   pub mut:
@@ -61,11 +62,19 @@ pub fn (eval MaterialCounter) score(stm Color) int {
 }
 
 pub fn (board Board) score() int {
-  if board.draw_counter >= 100 { return 0 }
+  if board.draw_counter >= 100 || board.is_repeated_position() { return 0 }
   
   us := board.turn
 
   return board.lazy_eval.score(us)
 }
 
+pub fn (board Board) is_repeated_position() bool {
+  return board.hash in board.states.map(it.hash)
+}
 
+pub fn (board Board) is_threefold_repetition() bool {
+  list := arrays.map_of_counts[chess.Bitboard](board.states.map(it.hash))
+
+  return list[board.hash] > 1
+}

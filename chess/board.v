@@ -389,8 +389,9 @@ pub fn (mut b Board) make_move(move Move) {
 	}
 
 	if is_pawn_double {
-		assert from & 7 == to & 7
-		b.en_passant_file = all_files[to & 7]
+		// assert from & 7 == to & 7
+		// b.en_passant_file = all_files[to & 7]
+		b.en_passant_file = empty_bb
 	}
 
 	if is_promotion {

@@ -104,7 +104,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	bot.search.pv.set_length(ply)
 	bot.search.nodes++	
 
-	if bot.board.draw_counter >= 100 { return 0 }
+	if ply > 0 && (bot.board.draw_counter >= 100 || bot.board.is_repeated_position()) { return 0 }
 
 	mut alpha, mut beta := a, b
 	mut depth := d

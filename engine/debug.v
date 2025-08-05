@@ -51,7 +51,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		'info' {
 			println('FEN: ${bot.board.get_fen()}')
 			println('Hash: ${bot.board.hash}')
-			println("Entry: ${bot.tt.lookup(bot.get_zobrist_key())}")
+			println("Entry: ${bot.tt.lookup(bot.board.hash)}")
 		}
 		'decode-move' {
 			move := args[1]
@@ -96,10 +96,15 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		}
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
+			println("${bot.board.states.map(it.hash.str())}")
 		}
 		'eval' {
 			println("Lazy Eval: ${bot.board.lazy_eval.score(bot.board.turn)}cp")
 			println("Direct Eval: ${bot.board.score()}cp")
+		}
+		'draw' {
+			println("50 Move Rule: ${bot.board.draw_counter >= 100}")
+			println("Threefold Repetition: ${bot.board.is_repeated_position()}")
 		}
 		else {}
 	}
