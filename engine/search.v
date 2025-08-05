@@ -34,7 +34,7 @@ pub fn (mut search Search) check_time() {
 }
 
 pub fn (bot Engine) score() int {
-	if bot.board.draw_counter >= 100 {
+	if bot.board.draw_counter >= 100 || bot.board.repetitions.is_real_draw(bot.board.position_hash) {
 		return 0
 	} else {
 		return bot.board.score()
@@ -120,8 +120,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	bot.search.pv.set_length(ply)
 	bot.search.nodes++	
 
-	if bot.board.draw_counter >= 100 { return 0 }
-
 	mut alpha, mut beta := a, b
 	mut depth := d
 
@@ -133,27 +131,12 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		return bot.score()
 	}
 
-	old_alpha := alpha
-	key := bot.get_zobrist_key()
-	entry := bot.tt.lookup(key)
-	is_valid_entry := entry.key == key
-	
-	mut entry_move := entry.move
-
-	// if is_valid_entry && ply > 0 && entry.depth >= depth {
-	// 	if entry.type == .exact ||
-	// 	(entry.type == .upperbound && entry.score < alpha) ||
-	// 	(entry.type == .lowerbound && entry.score >= beta) {
-	// 		return entry.score
-	// 	}
-	// }
-
 	mut best_score := -9999999
 	mut best_move := null_move
 	mut moves_searched := 0
 
 	mut move_list := bot.board.get_moves(.all)
-	mut scored_moves := ScoredMoveList.new(move_list, &bot, ply, entry_move)
+	mut scored_moves := ScoredMoveList.new(move_list, &bot, ply)
 
 	for {	
 		move := scored_moves.next_move()
@@ -200,11 +183,6 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 		} else {
 			return 0 
 		}
-	}
-
-	if !bot.search.overtime {
-		flag := if best_score >= beta { EntryType.lowerbound } else if best_score < old_alpha { .upperbound } else { .exact }
-		bot.tt.insert(TranspositionEntry { key, best_score, depth, best_move, flag })
 	}
 
 	return best_score

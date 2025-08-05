@@ -14,7 +14,6 @@ This list is modeled after the [pinned message](https://discord.com/channels/435
         - [x] MVV-LVA (+275 elo)
         - [x] Killer Moves (+15 elo)
         - [x] Simple History Heuristic (+20 elo)
-        - [x] TT-Move First (+70 elo)
     - [ ] ~~Quiesence Search~~ (this refuses to gain for some reason, revisit this later)
     - [ ] Transposition Tables
     - [ ] Principal Variation Search
