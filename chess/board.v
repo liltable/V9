@@ -10,6 +10,7 @@ pub:
 	halfmoves       int
 	en_passant_file Bitboard
 	castling_rights u8
+	hash Bitboard
 }
 
 pub struct Board {
@@ -29,14 +30,14 @@ pub mut:
 	history         []Move
 	states          []StateHistory
 	lazy_eval		MaterialCounter
-	position_hash   Bitboard
+	hash   Bitboard
 }
 
 pub fn (mut b Board) recalc_pos_hash() {
-	b.position_hash = empty_bb
+	b.hash = empty_bb
 
 	for sq, pc in b.pieces {
-		b.position_hash ^= zobrist.read_piece(pc, sq)
+		b.hash ^= zobrist.read_piece(pc, sq)
 	}
 }
 
@@ -50,7 +51,7 @@ pub fn (mut b Board) add_piece(piece Piece, at int) {
 		b.occupancies[piece.color()] |= bit
 		b.occupancies[Occupancies.both] |= bit
 
-		b.position_hash ^= zobrist.read_piece(piece, at)
+		b.hash ^= zobrist.read_piece(piece, at)
 
 		b.lazy_eval.add_piece(piece, at)
 	}
@@ -67,7 +68,7 @@ pub fn (mut b Board) remove_piece(at int) Piece {
 	b.occupancies[piece.color()] &= ~bit
 	b.occupancies[Occupancies.both] &= ~bit
 
-	b.position_hash ^= zobrist.read_piece(piece, at)
+	b.hash ^= zobrist.read_piece(piece, at)
 	b.lazy_eval.remove_piece(piece, at)
 
 	return piece
@@ -94,8 +95,8 @@ pub fn (mut b Board) move_piece(from int, to int) {
 		b.occupancies[Occupancies.both] &= ~f
 		b.occupancies[Occupancies.both] |= t
 
-		b.position_hash ^= zobrist.read_piece(piece, from)
-		b.position_hash ^= zobrist.read_piece(piece, to)
+		b.hash ^= zobrist.read_piece(piece, from)
+		b.hash ^= zobrist.read_piece(piece, to)
 
 		b.lazy_eval.move_piece(piece, from, to)
 	}
@@ -346,7 +347,10 @@ pub fn (mut b Board) make_move(move Move) {
 	is_capture := move.is_capture()
 	is_promotion := move.is_promotion()
 
-	b.states << StateHistory{captured, b.draw_counter, b.en_passant_file, b.castling_rights}
+	b.states << StateHistory{captured, b.draw_counter, b.en_passant_file, b.castling_rights, b.hash }
+
+	b.hash ^= zobrist.castling_keys[b.castling_rights]
+	b.hash ^= zobrist.en_passant_keys[b.en_passant_file.lsb() & 7]
 
 	b.move_counter++
 	b.draw_counter++
@@ -385,15 +389,12 @@ pub fn (mut b Board) make_move(move Move) {
 	}
 
 	if is_pawn_double {
-		b.en_passant_file = empty_bb
+		assert from & 7 == to & 7
+		b.en_passant_file = all_files[to & 7]
 	}
 
 	if is_promotion {
-		if piece != Piece.new(us, .pawn) {
-			println(move.lan())
-			b.print()
-			panic('wtf')
-		}
+		assert piece == Piece.new(us, .pawn)
 
 		b.remove_piece(from)
 
@@ -445,10 +446,13 @@ pub fn (mut b Board) make_move(move Move) {
 	b.history << move
 
 	b.turn = b.turn.opp()
+
+	b.hash ^= zobrist.side_key
+	b.hash ^= zobrist.castling_keys[b.castling_rights]
+	b.hash ^= zobrist.en_passant_keys[b.en_passant_file.lsb() & 7]
 }
 
 pub fn (mut b Board) undo_move() {
-	
 	move := b.history.pop()
 	old_state := b.states.pop()
 
@@ -469,10 +473,16 @@ pub fn (mut b Board) undo_move() {
 	assert b.turn == opp
 	assert old_state.captured == captured
 
+	b.hash ^= zobrist.castling_keys[b.castling_rights]
+	b.hash ^= zobrist.en_passant_keys[b.en_passant_file.lsb() & 7]
+
 	b.move_counter--
 	b.draw_counter = old_state.halfmoves
 	b.castling_rights = old_state.castling_rights
 	b.en_passant_file = old_state.en_passant_file
+
+	b.hash ^= zobrist.castling_keys[b.castling_rights]
+	b.hash ^= zobrist.en_passant_keys[b.en_passant_file.lsb() & 7]
 
 	if b.pieces[to] == null_piece && !is_en_passant {
 		// Mailbox Bitboard mismatch, always assert that the mailbox is wrong and correct it using the bitboards
@@ -513,6 +523,8 @@ pub fn (mut b Board) undo_move() {
 	}
 
 	b.turn = b.turn.opp()
+
+	b.hash ^= zobrist.side_key
 
 	assert b.turn == us
 }
