@@ -1,7 +1,6 @@
 module engine
 
-import chess { MoveList }
-
+import chess
 fn (mut bot Engine) handle_debug(mut args []string) {
 	args.delete(0)
 
@@ -97,6 +96,10 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		}
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
+		}
+		'eval' {
+			println("Lazy Eval: ${bot.board.lazy_eval.score(bot.board.turn)}cp")
+			println("Direct Eval: ${bot.board.score()}cp")
 		}
 		else {}
 	}

@@ -1,9 +1,9 @@
 module engine
 
-import time { StopWatch }
-import chess { Move, Bitboard, Color, MoveList }
+import time
+import chess
 
-const null_move = Move(0)
+const null_move = chess.Move(0)
 
 struct Search	
 {
@@ -13,7 +13,7 @@ struct Search
 	comms chan string
 	nodes int
 	depth int
-	timer StopWatch
+	timer time.StopWatch
 	active bool
 	overtime bool
 	pv PVTable
@@ -60,7 +60,7 @@ pub fn (mut bot Engine) start_search() {
 	}
 }
 
-pub fn (bot Engine) get_zobrist_key() Bitboard {
+pub fn (bot Engine) get_zobrist_key() chess.Bitboard {
 	mut key := bot.board.position_hash
 
 	key ^= chess.zobrist.castling_keys[bot.board.castling_rights]
@@ -69,7 +69,7 @@ pub fn (bot Engine) get_zobrist_key() Bitboard {
 		key ^= chess.zobrist.en_passant_keys[bot.board.en_passant_file.lsb() & 7]
 	}
 
-	if bot.board.turn == Color.black {
+	if bot.board.turn == chess.Color.black {
 		key ^= chess.zobrist.side_key
 	}
 
@@ -79,7 +79,7 @@ pub fn (bot Engine) get_zobrist_key() Bitboard {
 pub fn (mut bot Engine) iterate() {
 	mut depth := 1
 	mut input := ''
-	mut completed_searches := []Move{}
+	mut completed_searches := []chess.Move{}
 	alpha, beta := -9999999, 9999999
 	
 	for depth < max_depth {

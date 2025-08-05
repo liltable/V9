@@ -1,6 +1,6 @@
 module engine
 
-import time { StopWatch }
+import time
 
 fn (mut bot Engine) internal_perft(depth int) int {
 	if depth == 0 {
@@ -27,7 +27,7 @@ fn (mut bot Engine) internal_perft(depth int) int {
 pub fn (mut bot Engine) perft(depth int) {
 	mut total_nodes := 0
 
-	mut timer := StopWatch{}
+	mut timer := time.StopWatch{}
 
 	timer.start()
 

@@ -1,6 +1,6 @@
   module engine
 
-import chess { Bitboard, Move }
+import chess
 
 const global_tt_size_mb = 128
 
@@ -13,10 +13,10 @@ pub enum EntryType {
 
 struct TranspositionEntry {
 pub:
-	key   Bitboard
+	key   chess.Bitboard
 	score int
 	depth int
-	move  Move
+	move  chess.Move
 	type  EntryType
 }
 
@@ -42,7 +42,7 @@ pub fn (mut table TranspositionTable) insert(entry TranspositionEntry) {
 	table.entries[entry.key % u64(table.size)] = entry
 }
 
-pub fn (table TranspositionTable) lookup(key Bitboard) TranspositionEntry {
+pub fn (table TranspositionTable) lookup(key chess.Bitboard) TranspositionEntry {
 	return table.entries[key % u64(table.size)]
 }
 

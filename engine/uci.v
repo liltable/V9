@@ -1,7 +1,7 @@
 module engine
 
 import chess
-import rand { element }
+import rand
 
 fn (mut bot Engine) handle_uci() {
 	bot.output <- 'id name ${bot.info.name} v${bot.info.version}'
@@ -81,6 +81,6 @@ pub fn (mut bot Engine) handle_quit() {
 
 pub fn (mut bot Engine) random_move() chess.Move {
 	moves := bot.board.get_moves(.all).to_array()
-	move := element(moves) or { moves[0] }
+	move := rand.element(moves) or { moves[0] }
 	return move
 }

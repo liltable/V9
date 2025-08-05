@@ -1,6 +1,6 @@
 module engine
 
-import math { max, min }
+import math
 
 pub struct TimeControl {
 pub mut:
@@ -49,7 +49,7 @@ pub fn (bot Engine) choose_time_limit(time_control TimeControl) int {
 
 	my_time_remaining := time_control.time_remaining[us]
 	my_time_increment := time_control.increments[us]
-	min_think_time := min(25, my_time_remaining / 4)
+	min_think_time := math.min(25, my_time_remaining / 4)
 
 	mut time_limit := my_time_remaining / 10
 
@@ -57,5 +57,5 @@ pub fn (bot Engine) choose_time_limit(time_control TimeControl) int {
 		time_limit += my_time_increment * 80 / 100
 	}
 
-	return max(min_think_time, time_limit)
+	return math.max(min_think_time, time_limit)
 }

@@ -28,6 +28,7 @@ pub mut:
 	move_counter    int
 	history         []Move
 	states          []StateHistory
+	lazy_eval		MaterialCounter
 	position_hash   Bitboard
 }
 
@@ -50,6 +51,8 @@ pub fn (mut b Board) add_piece(piece Piece, at int) {
 		b.occupancies[Occupancies.both] |= bit
 
 		b.position_hash ^= zobrist.read_piece(piece, at)
+
+		b.lazy_eval.add_piece(piece, at)
 	}
 }
 
@@ -65,6 +68,7 @@ pub fn (mut b Board) remove_piece(at int) Piece {
 	b.occupancies[Occupancies.both] &= ~bit
 
 	b.position_hash ^= zobrist.read_piece(piece, at)
+	b.lazy_eval.remove_piece(piece, at)
 
 	return piece
 }
@@ -92,6 +96,8 @@ pub fn (mut b Board) move_piece(from int, to int) {
 
 		b.position_hash ^= zobrist.read_piece(piece, from)
 		b.position_hash ^= zobrist.read_piece(piece, to)
+
+		b.lazy_eval.move_piece(piece, from, to)
 	}
 }
 

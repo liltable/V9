@@ -1,19 +1,19 @@
 module engine
 
-import chess { Move }
+import chess
 
 pub struct PVTable {
 	mut:
-	lines [max_depth][max_depth]Move
+	lines [max_depth][max_depth]chess.Move
 	line_lengths [max_depth]int
 }
 
 pub fn (mut table PVTable) reset() {
-	table.lines = [max_depth][max_depth]Move{}
+	table.lines = [max_depth][max_depth]chess.Move{}
 	table.line_lengths = [max_depth]int{}
 }
 
-pub fn (mut table PVTable) update(move Move, ply int) {
+pub fn (mut table PVTable) update(move chess.Move, ply int) {
 	table.lines[ply][ply] = move
 
 	for i := ply + 1; i < table.line_lengths[ply + 1]; i++ {
@@ -37,6 +37,6 @@ pub fn (table PVTable) mainline() string {
 	 return s
 }
 
-pub fn (table PVTable) best_move() Move {
+pub fn (table PVTable) best_move() chess.Move {
 	return table.lines[0][0]
 }
