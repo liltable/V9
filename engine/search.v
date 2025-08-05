@@ -60,6 +60,22 @@ pub fn (mut bot Engine) start_search() {
 	}
 }
 
+pub fn (bot Engine) get_zobrist_key() chess.Bitboard {
+	mut key := bot.board.position_hash
+
+	key ^= chess.zobrist.castling_keys[bot.board.castling_rights]
+
+	if bot.board.en_passant_file > 0 {
+		key ^= chess.zobrist.en_passant_keys[bot.board.en_passant_file.lsb() & 7]
+	}
+
+	if bot.board.turn == chess.Color.black {
+		key ^= chess.zobrist.side_key
+	}
+
+	return key
+}
+
 pub fn (mut bot Engine) iterate() {
 	mut depth := 1
 	mut input := ''
@@ -118,7 +134,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	old_alpha := alpha
-	key := bot.board.hash
+	key := bot.get_zobrist_key()
 	entry := bot.tt.lookup(key)
 	is_valid_entry := entry.key == key
 	

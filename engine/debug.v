@@ -46,11 +46,11 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 			println('${(bot.board.castling_rights & chess.our_queenside_right[bot.board.turn]):b}')
 		}
 		'zobrist' {
-			println(bot.board.hash)
+			println(bot.board.position_hash)
 		}
 		'info' {
 			println('FEN: ${bot.board.get_fen()}')
-			println('Hash: ${bot.board.hash}')
+			println('Hash: ${bot.board.position_hash}')
 			println("Entry: ${bot.tt.lookup(bot.get_zobrist_key())}")
 		}
 		'decode-move' {
