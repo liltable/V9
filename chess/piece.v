@@ -24,6 +24,37 @@ pub enum Piecetype {
 	king
 }
 
+pub fn (piece Piece) get_attacks(sq int, blockers Bitboard) Bitboard {
+	mut attacks := empty_bb
+
+	kind := piece.type()
+	side := piece.color()
+
+	match kind {
+		.pawn {
+			attacks |= pawn_attacks[side][sq]
+		}
+		.knight {
+			attacks |= knight_attacks[sq]
+		}
+		.bishop {
+			attacks |= fast_bishop_moves(sq, blockers)
+		}
+		.rook {
+			attacks |= fast_rook_moves(sq, blockers)
+		}
+		.queen {
+			attacks |= fast_queen_moves(sq, blockers)
+		}
+		.king {
+			attacks |= king_attacks[sq]
+		}
+		else {}
+	}
+
+	return attacks
+}
+
 pub const piecetype_symbols = ['', 'p', 'n', 'b', 'r', 'q', 'k']
 pub const color_symbols = ['', 'w', 'b']
 

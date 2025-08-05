@@ -18,7 +18,8 @@ pub mut:
 	bitboards       [7]Bitboard // none, p, n, b, r, q, k
 	occupancies     [3]Bitboard // both, w, b
 	pinned          [3]Bitboard // none, w, b
-	pinray          [64]Bitboard = [64]Bitboard{} // for each piece, have it's pinray
+	attacked		[64]Bitboard // for each square, have a bitboard of pieces that attack it
+	pinray          [64]Bitboard // for each piece, have it's pinray
 	checkray        Bitboard     = max_bb
 	checkers        int
 	en_passant_file Bitboard
@@ -50,6 +51,8 @@ pub fn (mut b Board) add_piece(piece Piece, at int) {
 		b.occupancies[Occupancies.both] |= bit
 
 		b.position_hash ^= zobrist.read_piece(piece, at)
+
+		b.add_piece_attacks(piece, at)
 	}
 }
 
@@ -65,8 +68,31 @@ pub fn (mut b Board) remove_piece(at int) Piece {
 	b.occupancies[Occupancies.both] &= ~bit
 
 	b.position_hash ^= zobrist.read_piece(piece, at)
+	b.remove_piece_attacks(piece, at)
 
 	return piece
+}
+
+pub fn (mut b Board) add_piece_attacks(piece Piece, sq int) {
+	blockers := b.occupancies[Occupancies.both]
+
+	mut new_attacks := piece.get_attacks(sq, blockers)
+
+	for new_attacks > 0 {
+		target := new_attacks.pop_lsb()
+		b.attacked[target] |= square_bbs[sq]
+	}
+}
+
+pub fn (mut b Board) remove_piece_attacks(piece Piece, sq int) {
+	blockers := b.occupancies[Occupancies.both]
+
+	mut old_attacks := piece.get_attacks(sq, blockers)
+
+	for old_attacks > 0 {
+		target := old_attacks.pop_lsb()
+		b.attacked[target] &= ~square_bbs[sq]
+	}
 }
 
 pub fn (mut b Board) move_piece(from int, to int) {
@@ -92,6 +118,9 @@ pub fn (mut b Board) move_piece(from int, to int) {
 
 		b.position_hash ^= zobrist.read_piece(piece, from)
 		b.position_hash ^= zobrist.read_piece(piece, to)
+
+		b.remove_piece_attacks(piece, from)
+		b.add_piece_attacks(piece, to)
 	}
 }
 
@@ -271,10 +300,32 @@ pub fn (b Board) print() {
 	println(b.str())
 }
 
-pub fn (b Board) get_square_attackers(sq int, blockers Bitboard) Bitboard {
+pub fn (b Board) get_square_attackers(sq int) Bitboard {
 	us := b.turn
 	enemy := us.opp()
 	enemies := b.occupancies[enemy]
+
+	// orthogonal_sliders := (b.bitboards[Bitboards.queens] | b.bitboards[Bitboards.rooks]) & enemies
+	// diagonal_sliders := (b.bitboards[Bitboards.queens] | b.bitboards[Bitboards.bishops]) & enemies
+
+	// mut attackers := empty_bb
+
+	// attackers |= king_attacks[sq] & b.bitboards[Bitboards.kings] & enemies
+	// attackers |= pawn_attacks[us][sq] & b.bitboards[Bitboards.pawns] & enemies
+	// attackers |= knight_attacks[sq] & b.bitboards[Bitboards.knights] & enemies
+	// attackers |= fast_bishop_moves(sq, blockers) & diagonal_sliders
+	// attackers |= fast_rook_moves(sq, blockers) & orthogonal_sliders
+
+	return b.attacked[sq] & enemies
+
+	// return attackers
+}
+
+pub fn (b Board) check_for_attackers(sq int, blockers Bitboard) Bitboard {
+		us := b.turn
+	enemy := us.opp()
+	enemies := b.occupancies[enemy]
+
 	orthogonal_sliders := (b.bitboards[Bitboards.queens] | b.bitboards[Bitboards.rooks]) & enemies
 	diagonal_sliders := (b.bitboards[Bitboards.queens] | b.bitboards[Bitboards.bishops]) & enemies
 
@@ -302,7 +353,7 @@ pub fn (mut b Board) update_attacks() {
 	b.checkers = 0
 	b.checkray = empty_bb
 
-	xray_attackers := b.get_square_attackers(k, enemy)
+	xray_attackers := b.check_for_attackers(k, enemy)
 
 	mut scan := xray_attackers
 
@@ -520,5 +571,5 @@ pub fn (mut board Board) us_in_check() bool {
 pub fn (board Board) direct_check() bool {
 	our_king := board.bitboards[Bitboards.kings] & board.occupancies[board.turn]
 
-	return board.get_square_attackers(our_king.lsb(), board.occupancies[Occupancies.both]) != empty_bb
+	return board.get_square_attackers(our_king.lsb()) != empty_bb
 }

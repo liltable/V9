@@ -66,7 +66,7 @@ fn load_magics(slider Slider) []Bitboard {
 	for sq in 0 .. 64 {
 		entry := slider.entries(sq)
 		
-		mut blockers := Bitboard(0)
+		mut blockers := empty_bb
 
 		for {
 			moves := slider.moves(sq, blockers)
@@ -76,10 +76,9 @@ fn load_magics(slider Slider) []Bitboard {
 
 			blockers = (blockers - entry.mask) & entry.mask
 
-			if blockers == Bitboard(0) { break }
+			if blockers == empty_bb { break }
 		}
 	}
-	
 
 	return table
 }

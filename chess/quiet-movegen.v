@@ -266,7 +266,7 @@ pub fn (b Board) king_moves(mut list MoveList) {
 	for evasions > 0 {
 		destination := evasions.pop_lsb()
 
-		if b.get_square_attackers(destination, occupied) == empty_bb {
+		if b.get_square_attackers(destination) == empty_bb {
 			list.add_move(Move.quiet(king, k, destination))
 		}
 	}
@@ -275,7 +275,7 @@ pub fn (b Board) king_moves(mut list MoveList) {
 		target := captures.pop_lsb()
 		target_type := b.pieces[target].type()
 
-		if b.get_square_attackers(target, occupied) == empty_bb {
+		if b.get_square_attackers(target) == empty_bb {
 			list.add_move(Move.capture(king, target_type, k, target))
 		}
 	}
@@ -300,7 +300,7 @@ pub fn (b Board) king_moves(mut list MoveList) {
 			for in_between > 0 {
 				sq := in_between.pop_lsb()
 
-				if b.get_square_attackers(sq, occupied) > 0 {
+				if b.get_square_attackers(sq) > 0 {
 					eligible = false
 				}
 			}

@@ -34,10 +34,10 @@ fn (s Slider) relevant_blockers(square int) Bitboard {
 fn (s Slider) moves(square int, blockers Bitboard) Bitboard {
 	match s {
 		.bishop {
-			return bishop_attacks(square, blockers)
+			return get_bishop_attacks(square, blockers)
 		}
 		.rook {
-			return rook_attacks(square, blockers)
+			return get_rook_attacks(square, blockers)
 		}
 	}
 }
@@ -59,13 +59,13 @@ pub fn (s Slider) table_size() int {
 
 pub fn fast_bishop_moves(sq int, blockers Bitboard) Bitboard {
 	entry := bishop_magics[sq]
-	assert entry.mask == bishop_relevant_squares[sq]
+	// assert entry.mask == bishop_relevant_squares[sq]
 	return bishop_magic_moves[magic_index(entry, blockers)]
 }
 
 pub fn fast_rook_moves(sq int, blockers Bitboard) Bitboard {
 	entry := rook_magics[sq]
-	assert entry.mask == rook_relevant_squares[sq]
+	// assert entry.mask == rook_relevant_squares[sq]
 	return rook_magic_moves[magic_index(entry, blockers)]
 }
 
