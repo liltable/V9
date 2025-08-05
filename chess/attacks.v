@@ -1,6 +1,6 @@
 module chess
 
-pub fn get_pawn_attacks(sq int, side Color) Bitboard {
+pub fn pawn_attacks(sq int, side Color) Bitboard {
 	from := square_bbs[sq].forward(side)
 
 	left := from.left() & ~file_h
@@ -9,7 +9,7 @@ pub fn get_pawn_attacks(sq int, side Color) Bitboard {
 	return left | right
 }
 
-pub fn get_knight_attacks(sq int) Bitboard {
+pub fn knight_attacks(sq int) Bitboard {
 	from := square_bbs[sq]
 
 	not_hg := ~(file_h | file_g)
@@ -32,7 +32,7 @@ pub fn get_knight_attacks(sq int) Bitboard {
 	return attack
 }
 
-pub fn get_king_attacks(sq int) Bitboard {
+pub fn king_attacks(sq int) Bitboard {
 	king := square_bbs[sq]
 
 	mut attacks := empty_bb
@@ -50,7 +50,7 @@ pub fn get_king_attacks(sq int) Bitboard {
 	return attacks
 }
 
-pub fn get_bishop_attacks(sq int, blockers Bitboard) Bitboard {
+pub fn bishop_attacks(sq int, blockers Bitboard) Bitboard {
 	mut attacks := empty_bb
 
 	rank, file := sq >> 3, sq & 7 // square / 8, square % 8
@@ -118,7 +118,7 @@ pub fn get_bishop_attacks(sq int, blockers Bitboard) Bitboard {
 	return attacks
 }
 
-pub fn get_rook_attacks(sq int, blockers Bitboard) Bitboard {
+pub fn rook_attacks(sq int, blockers Bitboard) Bitboard {
 	mut attacks := empty_bb
 
 	rank, file := sq >> 3, sq & 7 // square / 8, square % 8
@@ -182,6 +182,6 @@ pub fn get_rook_attacks(sq int, blockers Bitboard) Bitboard {
 	return attacks
 }
 
-pub fn get_queen_attacks(sq int, blockers Bitboard) Bitboard {
-	return get_rook_attacks(sq, blockers) | get_bishop_attacks(sq, blockers)
+pub fn queen_attacks(sq int, blockers Bitboard) Bitboard {
+	return rook_attacks(sq, blockers) | bishop_attacks(sq, blockers)
 }

@@ -22,7 +22,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 			args.delete(0)
 
 			if args[0] in chess.square_names.map(it.str()) {
-				chess.get_rook_attacks(chess.square_names.map(it.str()).index(args[0]), bot.board.occupancies[chess.Occupancies.both]).print()
+				chess.rook_attacks(chess.square_names.map(it.str()).index(args[0]), bot.board.occupancies[chess.Occupancies.both]).print()
 			}
 		}
 		'pinned' {
@@ -97,19 +97,6 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 		}
 		'history' {
 			println("${bot.board.history.map(it.lan())}")
-		}
-		'attacked' {
-			unsafe {
-				sq := args[1]
-
-				sqs := chess.square_names.map(it.str())
-
-				if sq in sqs {
-					index := sqs.index(sq)
-					bot.board.attacked[index].print()
-					println("debug attack sq ${sq} (${index} - ${chess.square_names[index]})")
-				}
-			}
 		}
 		else {}
 	}
