@@ -12,25 +12,23 @@ pub struct MaterialCounter {
 
 pub fn (mut eval MaterialCounter) remove_piece(piece Piece, from int) {
   side := piece.color()
-  kind := piece.type()
 
+  score := piece.get_score_pair(from)
 
-  psqt_mg, psqt_eg := read_psqt(piece, from)
+  eval.mg[side] -= score.middlegame
+  eval.eg[side] -= score.endgame
 
-  eval.mg[side] -= mg_value[kind] + psqt_mg
-  eval.eg[side] -= eg_value[kind] + psqt_eg
-
-  eval.gamephase -= gamephase_inc[kind]
+  eval.gamephase -= gamephase_inc[piece.type()]
 }
 
 pub fn (mut eval MaterialCounter) add_piece(piece Piece, to int) {
   side := piece.color()
   kind := piece.type()
 
-  psqt_mg, psqt_eg := read_psqt(piece, to)
+  score := piece.get_score_pair(to)
 
-  eval.mg[side] += mg_value[kind] + psqt_mg
-  eval.eg[side] += eg_value[kind] + psqt_eg
+  eval.mg[side] += score.middlegame
+  eval.eg[side] += score.endgame
 
   eval.gamephase += gamephase_inc[kind]
 }
@@ -38,14 +36,14 @@ pub fn (mut eval MaterialCounter) add_piece(piece Piece, to int) {
 pub fn (mut eval MaterialCounter) move_piece(piece Piece, from int, to int) {
   side := piece.color()
 
-  from_mg, from_eg := read_psqt(piece, from)
-  to_mg, to_eg := read_psqt(piece, to)
+  from_score := piece.get_score_pair(from)
+  to_score := piece.get_score_pair(to)
 
-  eval.mg[side] -= from_mg
-  eval.eg[side] -= from_eg
+  eval.mg[side] -= from_score.middlegame
+  eval.eg[side] -= from_score.endgame
 
-  eval.mg[side] += to_mg
-  eval.eg[side] += to_eg
+  eval.mg[side] += to_score.middlegame
+  eval.eg[side] += to_score.endgame
 }
 
 

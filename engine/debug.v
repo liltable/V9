@@ -99,8 +99,7 @@ fn (mut bot Engine) handle_debug(mut args []string) {
 			println("${bot.board.states.map(it.hash.str())}")
 		}
 		'eval' {
-			println("Lazy Eval: ${bot.board.lazy_eval.score(bot.board.turn)}cp")
-			println("Direct Eval: ${bot.board.score()}cp")
+			println("Static Eval: ${bot.board.lazy_eval.score(bot.board.turn)}cp")
 		}
 		'draw' {
 			println("50 Move Rule: ${bot.board.draw_counter >= 100}")

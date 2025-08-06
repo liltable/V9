@@ -1,7 +1,7 @@
 # Visionary IX (V9)
 
 A UCI compliant chess engine written in the V programming language.\
-Current Version: 0.1\
+Current Version: 0.1
 
 ## Features
 This list is modeled after the [pinned message](https://discord.com/channels/435943710472011776/882956631514689597/1256706716515565638) in the Stockfish Discord channel. More features will be added as progression continues.
