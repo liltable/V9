@@ -40,12 +40,7 @@ pub fn TranspositionTable.new(size_mb int) TranspositionTable {
 
 pub fn (mut table TranspositionTable) insert(entry TranspositionEntry) {
 	key := entry.key % table.size
-
-	old_entry := table.entries[key]
-
-	if old_entry.depth < entry.depth {
-		table.entries[key] = entry
-	}
+	table.entries[key] = entry
 }
 
 pub fn (table TranspositionTable) lookup(key chess.Bitboard) TranspositionEntry {
