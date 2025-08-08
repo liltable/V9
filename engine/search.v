@@ -120,24 +120,22 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	old_alpha := alpha
 	key := bot.board.hash
 	entry := bot.tt.lookup(key)
-	is_valid_entry := entry.key == key
-	
-	mut entry_move := entry.move
+	// is_valid_entry := entry.type != .invalid && entry.key == key
 
 	// if is_valid_entry && ply > 0 && entry.depth >= depth {
 	// 	if entry.type == .exact ||
-	// 	(entry.type == .upperbound && entry.score < alpha) ||
+	// 	(entry.type == .upperbound && entry.score <= alpha) ||
 	// 	(entry.type == .lowerbound && entry.score >= beta) {
 	// 		return entry.score
 	// 	}
 	// }
 
+	move_list := bot.board.get_moves(.all)
+
 	mut best_score := -9999999
 	mut best_move := null_move
 	mut moves_searched := 0
-
-	mut move_list := bot.board.get_moves(.all)
-	mut scored_moves := ScoredMoveList.new(move_list, &bot, ply, entry_move)
+	mut scored_moves := ScoredMoveList.new(move_list, &bot, ply, entry.move)
 
 	for {	
 		move := scored_moves.next_move()
@@ -187,7 +185,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	if !bot.search.overtime {
-		flag := if best_score >= beta { EntryType.lowerbound } else if best_score < old_alpha { .upperbound } else { .exact }
+		flag := if best_score >= beta { EntryType.lowerbound } else if best_score <= old_alpha { .upperbound } else { .exact }
 		bot.tt.insert(TranspositionEntry { key, best_score, depth, best_move, flag })
 	}
 

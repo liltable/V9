@@ -25,7 +25,7 @@ pub const null_tt_entry = TranspositionEntry{}
 struct TranspositionTable {
 mut:
 	entries []TranspositionEntry
-	size    int
+	size    u64
 }
 
 pub fn TranspositionTable.new(size_mb int) TranspositionTable {
@@ -35,17 +35,23 @@ pub fn TranspositionTable.new(size_mb int) TranspositionTable {
 
 	table := []TranspositionEntry{len: entry_count}
 
-	return TranspositionTable{table, entry_count}
+	return TranspositionTable{table, u64(entry_count)}
 }
 
 pub fn (mut table TranspositionTable) insert(entry TranspositionEntry) {
-	table.entries[entry.key % u64(table.size)] = entry
+	key := entry.key % table.size
+
+	old_entry := table.entries[key]
+
+	if old_entry.depth < entry.depth {
+		table.entries[key] = entry
+	}
 }
 
 pub fn (table TranspositionTable) lookup(key chess.Bitboard) TranspositionEntry {
-	return table.entries[key % u64(table.size)]
+	return table.entries[key % table.size]
 }
 
 pub fn (mut table TranspositionTable) clear() {
-	table.entries = []TranspositionEntry{len: table.size}
+	table.entries = []TranspositionEntry{len: int(table.size)}
 }

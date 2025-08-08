@@ -33,12 +33,17 @@ pub mut:
 	hash   Bitboard
 }
 
-pub fn (mut b Board) recalc_pos_hash() {
-	b.hash = empty_bb
+pub fn (mut b Board) add_hash_attributes() {
+	b.hash ^= zobrist.castling_keys[b.castling_rights]
 
-	for sq, pc in b.pieces {
-		b.hash ^= zobrist.read_piece(pc, sq)
+	if b.en_passant_file != empty_bb {
+		b.hash ^= zobrist.en_passant_keys[b.en_passant_file.lsb() & 7]
 	}
+
+	if b.turn == .black {
+		b.hash ^= zobrist.side_key
+	}
+
 }
 
 pub fn (mut b Board) add_piece(piece Piece, at int) {
@@ -192,7 +197,7 @@ pub fn (mut b Board) load_fen(fen string) {
 	}
 
 	b.update_attacks()
-	b.recalc_pos_hash()
+	b.add_hash_attributes()
 }
 
 pub fn (b Board) get_fen() string {
@@ -233,13 +238,12 @@ pub fn (b Board) get_fen() string {
 	mut castling_rights := ''
 
 	for i, flag in castling_flags {
-		if (b.castling_rights & u8(flag)) > 0 {
+		if (b.castling_rights & flag) > 0 {
 			castling_rights += castling_symbols[i]
 		}
 	}
 
 	s += ' ${castling_rights}'
-
 
 	s += ' -'
 
@@ -372,12 +376,7 @@ pub fn (mut b Board) make_move(move Move) {
 			target := b.pieces[to]
 
 			assert target != null_piece
-			if target != Piece.new(opp, captured) {
-				b.print()
-				println(captured)
-				println(move.lan())
-				panic("huh")
-			}
+			assert target == Piece.new(opp, captured)
 
 			b.remove_piece(to)
 		}
@@ -389,8 +388,6 @@ pub fn (mut b Board) make_move(move Move) {
 	}
 
 	if is_pawn_double {
-		// assert from & 7 == to & 7
-		// b.en_passant_file = all_files[to & 7]
 		b.en_passant_file = empty_bb
 	}
 
@@ -398,7 +395,6 @@ pub fn (mut b Board) make_move(move Move) {
 		assert piece == Piece.new(us, .pawn)
 
 		b.remove_piece(from)
-
 		b.add_piece(Piece.new(us, promoted), from)
 	}
 
@@ -519,7 +515,6 @@ pub fn (mut b Board) undo_move() {
 
 	if is_promotion {
 		b.remove_piece(from)
-
 		b.add_piece(Piece.new(us, .pawn), from)
 	}
 
