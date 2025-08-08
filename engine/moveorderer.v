@@ -2,7 +2,7 @@ module engine
 
 import chess 
 
-pub type ScoredMoveList = []ScoredMove
+pub type ScoredMoveList = [100]ScoredMove
 
 pub struct ScoredMove {
 	move chess.Move
@@ -12,7 +12,7 @@ pub struct ScoredMove {
 pub const null_scored_move = ScoredMove{chess.null_move, -9999999}
 
 pub fn ScoredMoveList.new(move_list chess.MoveList, bot &Engine, ply int, entry_move chess.Move) ScoredMoveList {
-	mut scored_moves := []ScoredMove{len: move_list.count}
+	mut scored_moves := ScoredMoveList{}
 
 	for idx in 0 .. move_list.count {
 		mut score := 0
@@ -33,7 +33,25 @@ pub fn ScoredMoveList.new(move_list chess.MoveList, bot &Engine, ply int, entry_
 		scored_moves[idx] = ScoredMove { move, score }
 	}
 
-	return ScoredMoveList(scored_moves)
+	return scored_moves
+}
+
+pub fn ScoredMoveList.new_captures(move_list chess.MoveList) ScoredMoveList {
+	mut scored_moves := ScoredMoveList{}
+
+	for idx in 0 .. move_list.count {
+		mut score := 0
+
+		move := move_list.moves[idx]
+
+	 	if move.is_capture() {
+			score = int(move.captured()) - int(move.piece().type())
+		}
+
+		scored_moves[idx] = ScoredMove { move, score }
+	}
+
+	return scored_moves
 }
 
 pub fn (mut list ScoredMoveList) next_move() chess.Move {

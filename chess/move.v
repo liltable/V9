@@ -108,6 +108,10 @@ pub fn (m Move) lan() string {
 	return '${square_names[m.from_square()]}${square_names[m.to_square()]}${piecetype_symbols[(m & move_promo_mask) >> 20]}'
 }
 
+pub fn (m Move) str() string {
+	return m.lan()
+}
+
 pub fn Move.quiet(piece Piece, from int, to int) Move {
 	return Move.encode(piece, from, to, .none, .none, false, false, false)
 }

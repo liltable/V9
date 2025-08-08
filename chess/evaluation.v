@@ -55,8 +55,14 @@ pub fn (eval MaterialCounter) score(stm Color) int {
   mg_phase := math.min(eval.gamephase, 24)
   eg_phase := 24 - mg_phase
 
-  return ((mg_score * mg_phase) + (eg_score * eg_phase)) / 24
+  return (mg_score * mg_phase + eg_score * eg_phase) / 24
 
+}
+
+pub fn (mut eval MaterialCounter) reset() {
+  eval.mg = [3]int{}
+  eval.eg = [3]int{}
+  eval.gamephase = 0
 }
 
 pub fn (board Board) score() int {

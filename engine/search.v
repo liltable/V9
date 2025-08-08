@@ -33,13 +33,6 @@ pub fn (mut search Search) check_time() {
 	search.overtime = search.timer.elapsed().milliseconds() >= search.time_limit || stop == "stop"
 }
 
-pub fn (bot Engine) score() int {
-	if bot.board.draw_counter >= 100 {
-		return 0
-	} else {
-		return bot.board.score()
-	}
-}
 
 pub fn (mut bot Engine) start_search() {
 	bot.search.active = true
@@ -114,7 +107,7 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	if depth <= 0 {
-		return bot.score()
+		return bot.quiesence(alpha, beta)
 	}
 
 	old_alpha := alpha
@@ -190,4 +183,41 @@ pub fn (mut bot Engine) negamax(d int, ply int, a int, b int) int {
 	}
 
 	return best_score
+}
+
+pub fn (mut bot Engine) quiesence(a int, b int) int {
+	bot.search.nodes++
+
+	mut stand_pat := bot.board.score()
+
+	mut alpha, mut beta := a, b
+
+	if stand_pat >= beta { return stand_pat }
+	if stand_pat > alpha { alpha = stand_pat }
+
+	mut move_list := ScoredMoveList.new_captures(bot.board.get_moves(.captures))
+
+	for {
+		move := move_list.next_move()
+		if move == null_move { break }
+
+		bot.board.make_move(move)
+		score := -bot.quiesence(-beta, -alpha)
+		bot.board.undo_move()
+
+		if score > stand_pat {
+			stand_pat = score
+
+			if score > alpha {
+				alpha = score
+			}
+		}
+
+		if score >= beta {
+			break
+			// return stand_pat
+		}
+	}
+
+	return stand_pat
 }

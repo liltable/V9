@@ -108,6 +108,8 @@ pub fn (mut b Board) move_piece(from int, to int) {
 }
 
 pub fn (mut b Board) load_fen(fen string) {
+	b.lazy_eval.reset()
+	
 	properties := fen.split_by_space()
 
 	for i, aspect in properties {

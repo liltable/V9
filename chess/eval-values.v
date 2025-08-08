@@ -408,7 +408,7 @@ pub const king_scores = [
         ScorePair { 24, -24 }
         ScorePair { 14, -43 }
 ]
-
+//                             none, p, n, b, r, q, k
 pub const gamephase_inc = [0, 0, 1, 1, 2, 4, 0]
 
 pub fn (piece Piece) get_score_pair(sq int) ScorePair {

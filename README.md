@@ -4,23 +4,26 @@ A UCI compliant chess engine written in the V programming language.\
 Current Version: 0.1
 
 ## Features
+
 This list is modeled after the [pinned message](https://discord.com/channels/435943710472011776/882956631514689597/1256706716515565638) in the Stockfish Discord channel. More features will be added as progression continues.
+
 - [x] Legal Move Generation
-    - [x] Precalculated Leaper Attacks
-    - [x] Simple Magic Bitboard Slider Attacks
+  - [x] Precalculated Leaper Attacks
+  - [x] Simple Magic Bitboard Slider Attacks
 - [x] Negamax w/ Alpha-Beta Pruning
-    - [x] Iterative Deepening
-    - [x] Move Ordering
-        - [x] MVV-LVA (+275 elo)
-        - [x] Killer Moves (+15 elo)
-        - [x] Simple History Heuristic (+20 elo)
-        - [x] TT-Move First (+70 elo)
-    - [ ] ~~Quiesence Search~~ (this refuses to gain for some reason, revisit this later)
-    - [ ] Transposition Tables
-    - [ ] Principal Variation Search
-    - [ ] Aspiration Windows
+  - [x] Iterative Deepening
+  - [x] Move Ordering
+    - [x] MVV-LVA (+275 elo)
+    - [x] Killer Moves (+15 elo)
+    - [x] Simple History Heuristic (+20 elo)
+    - [x] TT-Move First (+70 elo)
+  - [x] Quiesence Search (+50 elo 😭) `my engine is allergic to proper elo gains`
+  - [ ] Transposition Tables
+  - [ ] Principal Variation Search
+  - [ ] Aspiration Windows
 
 ## Notes
+
 this takes so long to get right\
 its basically torture for the first few steps (writing movegen)\
 also features will have the elo gainer next to them when completed\
@@ -28,11 +31,17 @@ and more features will be added the more i learn about search selectivity\
 uhhh what else goes here\
 ...\
 lowkey this language kinda sucks for chess engine programming ngl\
-how do i default dance using markdown
+how do i default dance using markdown\
+...\
+this has been pure pain and suffering to work with\
+my engine is allergic to properly gaining elo\
+send help
+
 ## Credits
+
 - tabledotnet (me lol)
 - [chess programming discord](https://discord.com/invite/F6W6mMsTGN)
 - [stockfish discord](https://discord.gg/GWDRS3kU6R)
 - bbc chess engine series by [maksim korzh](https://github.com/maksimkorzh/bbc)
 - chess coding adventure series by [sebastian lague](https://github.com/seblague/chess-coding-adventure)
-reason
+  reason

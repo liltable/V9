@@ -137,7 +137,6 @@ pub fn (b Board) knight_quiets(mut list MoveList) {
 	in_check := b.checkers > 0
 
 	// Pinned knights can't move, so no fancy pinned piece handling
-
 	mut knights := b.bitboards[Bitboards.knights] & b.occupancies[us] & ~b.pinned[us]
 
 	for knights > 0 {
